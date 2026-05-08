@@ -902,6 +902,33 @@ body.history-body {
 .mini-tile.maybe .num { color: #b8b8b8; }
 .mini-tile.no .num { color: #5a5a5a; }
 
+.polar-wrap {
+  position: relative;
+  border: 1px solid var(--line);
+  padding: 14px;
+  margin-top: 4px;
+  aspect-ratio: 1 / 1;
+  max-height: 360px;
+}
+.polar-wrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+.polar-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: var(--muted-2);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.polar-wrap.has-data .polar-empty { display: none; }
+
 .lesson-input-bar {
   grid-column: 1;
   grid-row: 2;

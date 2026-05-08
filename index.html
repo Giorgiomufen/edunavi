@@ -187,9 +187,16 @@
                 <span class="label">Ei saanud</span>
               </div>
             </div>
-            <div style="height: 160px; border: 1px solid var(--line); padding: 10px; margin-top: 4px;">
-              <canvas id="response-chart"></canvas>
+            <div class="polar-wrap">
+              <canvas id="polar-chart"></canvas>
+              <div id="polar-empty" class="polar-empty">Postita ülesanne, et näha kuumakaarti</div>
             </div>
+            <details style="margin-top:6px;">
+              <summary style="cursor:pointer; color:var(--muted); font-family:'Barlow Condensed',sans-serif; font-size:10px; letter-spacing:0.28em; text-transform:uppercase;">Viimase etapi tulpdiagramm</summary>
+              <div style="height: 140px; border: 1px solid var(--line); padding: 10px; margin-top: 8px;">
+                <canvas id="response-chart"></canvas>
+              </div>
+            </details>
           </div>
 
           <div id="intervention-card" class="sidebar-card intervention" style="display:none;">

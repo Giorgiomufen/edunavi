@@ -13,9 +13,31 @@
     stats: { exercises: 0, responses: 0, yes: 0 },
     studentCount: 0,
     respondedSessions: new Set(),
+    // exerciseId -> { sessionId: 'yes'|'no'|'unsure' }
+    // single source of truth for response counts; replaces +1 increments
+    perStepResponses: {},
+    // ordered list of all exercises this lesson, for the polar chart
+    exerciseOrder: [],
+    exerciseTextById: {},
+    polarChart: null,
     chart: null,
     jitsi: null,
   };
+
+  function recordResponse(exerciseId, sessionId, answer) {
+    if (!exerciseId || !sessionId) return false;
+    if (!state.perStepResponses[exerciseId]) state.perStepResponses[exerciseId] = {};
+    const prev = state.perStepResponses[exerciseId][sessionId];
+    if (prev === answer) return false; // idempotent — same answer, no change
+    state.perStepResponses[exerciseId][sessionId] = answer;
+    return true;
+  }
+  function countsFor(exerciseId) {
+    const m = state.perStepResponses[exerciseId] || {};
+    const c = { yes: 0, unsure: 0, no: 0 };
+    Object.values(m).forEach((a) => { if (c[a] !== undefined) c[a]++; });
+    return c;
+  }
 
   // Persist active lesson so teacher can rejoin after refresh / accidental leave.
   function persistActiveLesson() {
@@ -101,6 +123,94 @@
       el.textContent = "—";
     } else {
       el.textContent = `${responded} / ${total}`;
+    }
+  }
+
+  function trafficLightColor(yesPct, alpha) {
+    // green if most got it, yellow mid, red if many stuck
+    const a = alpha === undefined ? 0.85 : alpha;
+    if (yesPct >= 0.7) return `rgba(46, 204, 113, ${a})`;     // green
+    if (yesPct >= 0.4) return `rgba(241, 196, 15, ${a})`;     // yellow
+    return `rgba(231, 76, 60, ${a})`;                          // red
+  }
+
+  function initPolarChart() {
+    if (state.polarChart) { try { state.polarChart.destroy(); } catch (e) {} state.polarChart = null; }
+    const canvas = $("polar-chart");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    state.polarChart = new Chart(ctx, {
+      type: "polarArea",
+      data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderColor: "#000", borderWidth: 2 }] },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 350 },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              title: (items) => items[0].label,
+              label: (item) => {
+                const exId = state.exerciseOrder[item.dataIndex];
+                const c = countsFor(exId);
+                const t = c.yes + c.unsure + c.no;
+                if (t === 0) return "Pole vastuseid";
+                const pct = Math.round((c.yes / t) * 100);
+                return `${pct}% sai aru · ${c.yes}/${c.unsure}/${c.no} (jah/kindel-pole/ei)`;
+              },
+            },
+          },
+        },
+        scales: {
+          r: {
+            min: 0, max: 100,
+            ticks: { color: "#444", backdropColor: "transparent", font: { size: 9 }, stepSize: 25 },
+            grid: { color: "rgba(255,255,255,0.08)" },
+            angleLines: { color: "rgba(255,255,255,0.08)" },
+            pointLabels: { color: "#888", font: { size: 11 } },
+          },
+        },
+      },
+    });
+  }
+
+  function updatePolarChart() {
+    if (!state.polarChart) initPolarChart();
+    if (!state.polarChart) return;
+    const wrap = $("polar-chart").parentElement;
+    const order = state.exerciseOrder;
+    if (order.length === 0) {
+      wrap.classList.remove("has-data");
+      state.polarChart.data.labels = [];
+      state.polarChart.data.datasets[0].data = [];
+      state.polarChart.data.datasets[0].backgroundColor = [];
+      state.polarChart.update();
+      return;
+    }
+    wrap.classList.add("has-data");
+    const labels = []; const data = []; const colors = [];
+    order.forEach((exId, i) => {
+      const c = countsFor(exId);
+      const total = c.yes + c.unsure + c.no;
+      const yesPct = total === 0 ? 0 : c.yes / total;
+      // bar height: % "got it" + a small visible base so empty steps still show
+      const value = total === 0 ? 8 : Math.max(8, Math.round(yesPct * 100));
+      labels.push(`Etapp ${i + 1}`);
+      data.push(value);
+      colors.push(total === 0 ? "rgba(255,255,255,0.08)" : trafficLightColor(yesPct, 0.78));
+    });
+    state.polarChart.data.labels = labels;
+    state.polarChart.data.datasets[0].data = data;
+    state.polarChart.data.datasets[0].backgroundColor = colors;
+    state.polarChart.update();
+  }
+
+  function trackExercise(id, text) {
+    if (!id) return;
+    if (state.exerciseOrder.indexOf(id) === -1) {
+      state.exerciseOrder.push(id);
+      state.exerciseTextById[id] = text;
     }
   }
 
@@ -333,10 +443,12 @@
     state.currentExerciseId = exercise.id;
     state.stats.exercises++;
     state.respondedSessions = new Set();
+    trackExercise(exercise.id, text);
     setCurrentExercise(text);
     resetCounts();
     updateStats();
     updateResponseRate();
+    updatePolarChart();
     if (state.channel) {
       state.channel.sendExercise(exercise);
       state.channel.updatePresence({ currentExercise: exercise });
@@ -509,6 +621,8 @@
     state.currentExerciseId = stepObjects[stepObjects.length - 1].id; // chart shows the latest
     state.stats.exercises += stepObjects.length;
     state.respondedSessions = new Set();
+    stepObjects.forEach((ex) => trackExercise(ex.id, ex.text));
+    updatePolarChart();
 
     // Show the LAST step as "current exercise" — chart will fill from per-step responses
     setCurrentExercise(stepObjects[stepObjects.length - 1].text);
@@ -654,6 +768,8 @@
 
     initChart();
     updateChart();
+    initPolarChart();
+    updatePolarChart();
     updateStats();
 
     if (!EduNavi.isConfigured) {
@@ -680,16 +796,29 @@
 
     state.channel = EduNavi.openRoomChannel(code, "teacher", {
       onResponse: (r) => {
-        if (!state.currentExerciseId || r.exerciseId === state.currentExerciseId) {
-          if (r.answer === "yes") { state.counts.yes++; state.stats.yes++; }
-          else if (r.answer === "no") state.counts.no++;
-          else if (r.answer === "unsure") state.counts.unsure++;
-          state.stats.responses++;
-          if (r.sessionId) state.respondedSessions.add(r.sessionId);
+        if (!r || !r.exerciseId || !r.answer) return;
+        // Replace-not-add: a session's answer can only count once per step.
+        // If the same student switches yes→no, totals shift, not stack.
+        const changed = recordResponse(r.exerciseId, r.sessionId || `anon-${Math.random()}`, r.answer);
+        if (!changed) return; // same answer as before — ignore
+        if (r.sessionId) state.respondedSessions.add(r.sessionId);
+        // Recompute current step's counts from the source of truth
+        if (r.exerciseId === state.currentExerciseId) {
+          state.counts = countsFor(r.exerciseId);
           updateChart();
-          updateStats();
-          updateResponseRate();
         }
+        // Lesson-wide stats: total unique responses + yes responses
+        state.stats.responses = 0;
+        state.stats.yes = 0;
+        Object.values(state.perStepResponses).forEach((sessionMap) => {
+          Object.values(sessionMap).forEach((ans) => {
+            state.stats.responses++;
+            if (ans === "yes") state.stats.yes++;
+          });
+        });
+        updateStats();
+        updateResponseRate();
+        updatePolarChart();
       },
       onPresence: (n) => {
         state.studentCount = n;
@@ -737,6 +866,7 @@
     clearActiveLesson();
     if (state.channel) state.channel.close();
     if (state.chart) { try { state.chart.destroy(); } catch (e) {} }
+    if (state.polarChart) { try { state.polarChart.destroy(); } catch (e) {} }
     if (state.jitsi) { try { state.jitsi.dispose(); } catch (e) {} }
     const keepUser = state.user;
     state = {

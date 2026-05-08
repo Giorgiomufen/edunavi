@@ -150,6 +150,8 @@
   }
 
   function answerStep(exerciseId, answer, li) {
+    // Idempotent: clicking same button twice is a no-op
+    if (state.perStepAnswers[exerciseId] === answer) return;
     state.perStepAnswers[exerciseId] = answer;
     li.classList.remove("a-yes", "a-no", "a-unsure");
     li.classList.add("answered", `a-${answer}`);
