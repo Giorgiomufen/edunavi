@@ -477,44 +477,78 @@ body.history-body {
   padding: 16px 48px;
   letter-spacing: 0.3em;
 }
-.cta-row {
+/* === Hero join input (Kahoot-style: PIN front and center) === */
+.join-hero {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  max-width: 360px;
+  margin: 0 auto;
 }
-.cta-divider {
-  color: var(--muted);
-  font-size: 11px;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-}
-.join-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.join-row input {
+.join-hero-label {
   font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 700;
-  font-size: 22px !important;
-  letter-spacing: 0.2em !important;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+}
+.join-hero input {
+  font-family: 'Barlow Condensed', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 56px !important;
+  letter-spacing: 0.22em !important;
   text-align: center !important;
   text-transform: uppercase;
-  border: 1px solid var(--line) !important;
+  border: 1px solid var(--line-strong) !important;
   background: rgba(255,255,255,0.02) !important;
-  padding: 10px 12px !important;
-  width: 130px !important;
+  padding: 18px 0 !important;
+  color: var(--text);
+  caret-color: var(--text);
 }
-.join-row input:focus { border-color: var(--text) !important; }
-.join-row button {
-  padding: 14px 22px;
+.join-hero input::placeholder {
+  color: var(--muted-2);
+  letter-spacing: 0.22em;
+}
+.join-hero input:focus {
+  border-color: var(--text) !important;
+  background: rgba(255,255,255,0.05) !important;
+}
+.join-hero-go {
+  font-size: 14px;
+  padding: 18px 28px;
+  letter-spacing: 0.3em;
+}
+
+.host-divider {
+  text-align: center;
+  margin: 32px 0 18px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+
+.ghost-button {
+  display: inline-block;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  padding: 12px 22px;
   font-size: 12px;
+  letter-spacing: 0.22em;
 }
+.ghost-button:hover:not(:disabled) {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--text);
+}
+
 @media (max-width: 600px) {
-  .cta-row { flex-direction: column; gap: 12px; }
-  .cta-divider { font-size: 10px; }
+  .join-hero input { font-size: 44px !important; }
 }
 .start-details {
   margin-top: 24px;
