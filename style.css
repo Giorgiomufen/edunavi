@@ -614,6 +614,103 @@ body.classes-body { height: auto; overflow-y: auto; }
 .patterns-list .pattern-cross-class { border-left-color: rgb(241, 196, 15); }
 .patterns-list .pattern-global      { border-left-color: var(--line-strong); }
 
+/* === About page === */
+body.about-body { height: auto; overflow-y: auto; }
+.about-main {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+.about-hero { max-width: 760px; }
+.about-hero .eyebrow { display: block; margin-bottom: 14px; }
+.about-h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  font-size: clamp(28px, 4.5vw, 48px);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  margin: 0 0 22px;
+}
+.about-lead {
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--muted);
+  max-width: 700px;
+  margin: 0;
+}
+.about-three {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+.about-tile {
+  border-top: 1px solid var(--line);
+  padding: 20px 0;
+}
+.about-tile .about-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+.about-tile h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: 0.04em;
+  margin: 6px 0 12px;
+}
+.about-tile p {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--muted);
+  margin: 0;
+}
+.about-tile p strong, .about-tile p em { color: var(--text); font-style: normal; }
+.about-roles .about-roles-list {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0;
+  display: grid;
+  gap: 14px;
+}
+.about-roles li {
+  border: 1px solid var(--line);
+  padding: 16px 18px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.about-roles li strong { color: var(--text); }
+.about-roles a { color: var(--text); border-bottom: 1px solid var(--line-strong); }
+.about-not ul {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0;
+  display: grid;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.about-not li {
+  padding-left: 22px;
+  position: relative;
+}
+.about-not li::before {
+  content: '×';
+  position: absolute; left: 0; top: 0;
+  color: var(--warn);
+  font-weight: 700;
+}
+.about-foot {
+  border-top: 1px solid var(--line);
+  padding-top: 22px;
+}
+
 /* === Tugiõpetaja mobile view === */
 body.tugi-body { height: auto; overflow-y: auto; background: var(--bg); }
 .tugi-header {

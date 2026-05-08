@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="et">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EduNavi — mis see on</title>
+    <meta name="description" content="EduNavi on õpetaja otsustugi: olemasolevatest andmetest klass jaotuses ja konkreetne järgmine samm." />
+    <meta name="theme-color" content="#000000" />
+    <link rel="canonical" href="https://edunavi.vercel.app/about" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="EduNavi — õpetaja otsustugi" />
+    <meta property="og:description" content="Üks õpetaja, sada õpilast, üks pilk." />
+    <meta property="og:image" content="https://edunavi.vercel.app/og.svg" />
+    <meta property="og:locale" content="et_EE" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Ctext x='50%25' y='62%25' font-family='Arial' font-size='18' font-weight='700' fill='white' text-anchor='middle'%3EE%3C/text%3E%3C/svg%3E" />
+  </head>
+  <body class="about-body">
+    <header class="class-header">
+      <a href="/" class="wordmark" style="border:0; color:var(--text);">EduNavi <small>Mis see on</small></a>
+      <div class="class-meta-bar">
+        <span class="mono">Tallinn 2026 · Presidendi Hackathon</span>
+      </div>
+      <a href="/class" class="ghost-button" style="text-decoration:none; padding:10px 18px;">Ava demo</a>
+    </header>
+
+    <main class="about-main">
+      <section class="about-hero">
+        <span class="eyebrow">Üks lause</span>
+        <h1 class="about-h1">EduNavi võtab olemasoleva eKooli-andmestiku ja ütleb õpetajale ühe minuti jooksul, mis on järgmine parim samm.</h1>
+        <p class="about-lead">
+          Eestis on andmed olemas. Õpetajatel on eKool, Moodle, töövihikud, töödekoondamine. Aga puudub aeg
+          neid igal tunnil läbi mõelda. EduNavi tõlgendab need andmed klassi jaotuseks ja konkreetseks soovituseks —
+          võimendatud õpetaja mudeli jaoks, kus üks õpetaja juhib mitut klassi.
+        </p>
+      </section>
+
+      <section class="about-three">
+        <div class="about-tile">
+          <span class="about-num">1.</span>
+          <h2>Probleem</h2>
+          <p>
+            Õpetaja teeb iga matemaatikatunni järel käsitsi: vaatab eKooli, otsib mustreid,
+            otsustab kas teha kordus või liikuda edasi. See võtab 10+ minutit ja tehakse
+            sageli kõhutunde pealt. Võimendatud õpetaja mudelis on see veelgi raskem —
+            õpetaja ei ole kogu aeg klassis kohal.
+          </p>
+        </div>
+        <div class="about-tile">
+          <span class="about-num">2.</span>
+          <h2>Lahendus</h2>
+          <p>
+            EduNavi võtab samad andmed ja teeb sama analüüsi reegliotsusega minutiga.
+            Kolm gruppi: <strong>Vajab tuge</strong>, <strong>Ebakindel</strong>,
+            <strong>Valmis edasi</strong>. Üks rida soovitust: <em>"Tee kordus murdude
+            liitmise kohta — 6 õpilast vajavad."</em> Õpetaja kinnitab või muudab.
+          </p>
+        </div>
+        <div class="about-tile">
+          <span class="about-num">3.</span>
+          <h2>Mõõde</h2>
+          <p>
+            Hüpotees: 10× kiirem otsus, kõrgem otsustuskindlus, "varjatud mustrite"
+            märkamine (õpilane, kes sai õige vastuse, aga kahtleb). Mõõdame koolipiloodis
+            Tallinnas — esimene valideerimine järgmise kvartali jooksul.
+          </p>
+        </div>
+      </section>
+
+      <section class="about-roles">
+        <span class="eyebrow">Kasutajarollid</span>
+        <ul class="about-roles-list">
+          <li>
+            <strong>Võimendatud õpetaja</strong> — distantsilt mitut klassi juhtiv aineõpetaja.
+            Vaade: <a href="/classes">/classes</a> — kõik klassid prioriteedi järgi.
+          </li>
+          <li>
+            <strong>Kohapealne õpetaja / abiõpetaja</strong> — füüsiliselt klassis.
+            Vaade: <a href="/tugi">/tugi</a> — kelle juurde minna, mida öelda.
+          </li>
+          <li>
+            <strong>Õpilane</strong> — anonüümne, ühe klõpsuga tagasiside.
+            Vaade: <a href="/student">/student</a> — sisesta kood ja liitu.
+          </li>
+        </ul>
+      </section>
+
+      <section class="about-not">
+        <span class="eyebrow">Mida EduNavi ei ole</span>
+        <ul>
+          <li>Ei ole uus õpikeskkond ega õppesisuplatvorm.</li>
+          <li>Ei asenda õpetaja pedagoogilist otsust — soovitab, õpetaja kinnitab.</li>
+          <li>Ei kontrolli matemaatilise lahenduse õigsust automaatselt.</li>
+          <li>Ei salvesta MVP-s õpilase isikut. Sessioon, ülesanne, soovitus, ajatempel.</li>
+        </ul>
+      </section>
+
+      <section class="about-foot">
+        <p class="mono" style="color:var(--muted-2); font-size:11px; letter-spacing:0.1em;">
+          v0.1 · Tallinn · Presidendi Häkk 2026 · prototüüp · andmed simuleeritud
+        </p>
+        <p style="margin-top:8px;"><a href="/class" class="link-button">Ava demo →</a></p>
+      </section>
+    </main>
+  </body>
+</html>
