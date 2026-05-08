@@ -58,7 +58,7 @@
 
   function studentJoinUrl(roomCode) {
     const base = publicBaseUrl();
-    return `${base}/student.html?room=${encodeURIComponent(roomCode)}`;
+    return `${base}/student?room=${encodeURIComponent(roomCode)}`;
   }
 
   function jitsiRoomName(roomCode) {

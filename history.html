@@ -3,16 +3,21 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>EduNavi — Tundide ajalugu</title>
+    <title>EduNavi — tundide ajalugu</title>
+    <meta name="description" content="Vaata oma varasemaid EduNavi tunde ja klassi mõistmise statistikat." />
+    <meta name="theme-color" content="#000000" />
+    <link rel="canonical" href="https://edunavi.vercel.app/history" />
+    <meta name="robots" content="noindex" />
     <link rel="stylesheet" href="style.css" />
     <link rel="icon" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Ctext x='50%25' y='62%25' font-family='Arial' font-size='18' font-weight='700' fill='white' text-anchor='middle'%3EE%3C/text%3E%3C/svg%3E" />
+    <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%23000'/%3E%3Ctext x='50%25' y='62%25' font-family='Arial' font-size='100' font-weight='700' fill='white' text-anchor='middle'%3EE%3C/text%3E%3C/svg%3E" />
   </head>
   <body class="history-body">
     <header class="history-header">
-      <a href="index.html" class="wordmark" style="border:0; color:var(--text);">EduNavi <small>Tundide ajalugu</small></a>
+      <a href="/" class="wordmark" style="border:0; color:var(--text);">EduNavi <small>Tundide ajalugu</small></a>
       <div style="display:flex; align-items:center; gap:14px;">
         <span id="user-email" class="mono" style="font-size:12px; color:var(--muted);"></span>
-        <a href="index.html" class="btn-link" style="font-size:11px; padding:8px 14px; border:1px solid var(--line-strong); text-decoration:none;">Tagasi</a>
+        <a href="/" class="btn-link" style="font-size:11px; padding:8px 14px; border:1px solid var(--line-strong); text-decoration:none;">Tagasi</a>
       </div>
     </header>
 
@@ -20,11 +25,11 @@
       <div id="history-loading" class="history-state">Laadin…</div>
       <div id="history-empty" class="history-state" style="display:none;">
         Sul pole veel ühtegi salvestatud tundi.<br />
-        <a href="index.html" style="margin-top:14px; display:inline-block;">Alusta esimest tundi</a>
+        <a href="/" style="margin-top:14px; display:inline-block;">Alusta esimest tundi</a>
       </div>
       <div id="history-needauth" class="history-state" style="display:none;">
         Tundide ajalugu on saadaval ainult sisse logitud kasutajale.<br />
-        <a href="index.html" style="margin-top:14px; display:inline-block;">Tagasi avalehele ja logi sisse</a>
+        <a href="/" style="margin-top:14px; display:inline-block;">Tagasi avalehele ja logi sisse</a>
       </div>
       <div id="history-list" style="display:none;"></div>
     </main>

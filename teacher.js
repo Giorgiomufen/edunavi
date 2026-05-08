@@ -708,7 +708,7 @@
         e.preventDefault();
         const code = ji.value.toUpperCase().trim();
         if (!/^[A-Z]{4}$/.test(code)) { ji.focus(); return; }
-        window.location.href = `student.html?room=${encodeURIComponent(code)}`;
+        window.location.href = `student?room=${encodeURIComponent(code)}`;
       });
     }
     $("post-btn").addEventListener("click", postExercise);

@@ -3,9 +3,25 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>EduNavi — Õpetaja</title>
+    <title>EduNavi — õpetaja otsustugi reaalajas</title>
+    <meta name="description" content="EduNavi — üks õpetaja, sada õpilast, üks pilk. Reaalajas tagasiside, kus õpilased matemaatikaülesandes kinni jäävad." />
+    <meta name="theme-color" content="#000000" />
+    <link rel="canonical" href="https://edunavi.vercel.app/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="EduNavi — õpetaja otsustugi reaalajas" />
+    <meta property="og:description" content="Üks õpetaja, sada õpilast, üks pilk. Reaalajas tagasiside, kus õpilased kinni jäävad." />
+    <meta property="og:image" content="https://edunavi.vercel.app/og.svg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:url" content="https://edunavi.vercel.app/" />
+    <meta property="og:locale" content="et_EE" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="EduNavi — õpetaja otsustugi reaalajas" />
+    <meta name="twitter:description" content="Üks õpetaja, sada õpilast, üks pilk." />
+    <meta name="twitter:image" content="https://edunavi.vercel.app/og.svg" />
     <link rel="stylesheet" href="style.css" />
     <link rel="icon" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Ctext x='50%25' y='62%25' font-family='Arial' font-size='18' font-weight='700' fill='white' text-anchor='middle'%3EE%3C/text%3E%3C/svg%3E" />
+    <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%23000'/%3E%3Ctext x='50%25' y='62%25' font-family='Arial' font-size='100' font-weight='700' fill='white' text-anchor='middle'%3EE%3C/text%3E%3C/svg%3E" />
   </head>
   <body>
     <div class="banner" id="config-banner"></div>
@@ -15,7 +31,7 @@
       <span id="top-auth-loading" style="color:var(--muted-2); font-size:11px; letter-spacing:0.25em; text-transform:uppercase;">kontroll</span>
       <button id="open-signin" class="link-button" style="display:none;">Logi sisse</button>
       <span id="top-auth-user" style="display:none; align-items:center; gap:14px;">
-        <a href="history.html" class="link-button" style="font-size:12px;">Mine tunnid</a>
+        <a href="/history" class="link-button" style="font-size:12px;">Mine tunnid</a>
         <span id="user-email" class="mono" style="font-size:12px; color:var(--muted);"></span>
         <button id="signout-btn" style="font-size:10px; padding:6px 12px;">Logi välja</button>
       </span>
@@ -50,7 +66,7 @@
           Anonüümselt töötab kohe. Tundide salvestamiseks saad luua konto paremal üleval.
         </p>
         <p style="margin-top:18px;">
-          <a href="preview.html" class="link-button" style="font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted);">
+          <a href="/preview" class="link-button" style="font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted);">
             Phase 2 eelvaade — AI etapistus →
           </a>
         </p>
@@ -74,7 +90,7 @@
         <p id="summary-meta" class="mono" style="font-size:11px; color:var(--muted); margin:24px 0 8px;"></p>
         <div style="display:flex; gap:10px; margin-top:20px;">
           <button class="primary" id="summary-close" style="flex:1;">Mine algusesse</button>
-          <a href="history.html" id="summary-history-link" class="btn-link" style="flex:1; text-align:center; padding:12px 22px; border:1px solid var(--line-strong); text-decoration:none; font-family:'Barlow Condensed', sans-serif; font-weight:600; font-size:12px; letter-spacing:0.22em; text-transform:uppercase; display:none;">Mine ajalukku</a>
+          <a href="/history" id="summary-history-link" class="btn-link" style="flex:1; text-align:center; padding:12px 22px; border:1px solid var(--line-strong); text-decoration:none; font-family:'Barlow Condensed', sans-serif; font-weight:600; font-size:12px; letter-spacing:0.22em; text-transform:uppercase; display:none;">Mine ajalukku</a>
         </div>
       </div>
     </div>
