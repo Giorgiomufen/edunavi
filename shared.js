@@ -137,6 +137,9 @@
     channel.on("broadcast", { event: "lesson_end" }, (payload) => {
       handlers.onLessonEnd && handlers.onLessonEnd(payload.payload || {});
     });
+    channel.on("broadcast", { event: "step_set" }, (payload) => {
+      handlers.onStepSet && handlers.onStepSet(payload.payload || {});
+    });
 
     channel.on("presence", { event: "sync" }, () => {
       const state = channel.presenceState();

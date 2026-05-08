@@ -56,24 +56,25 @@
       </div>
 
       <span class="section-heading" style="display: block; margin-bottom: 8px;">Ülesanne</span>
-      <div id="exercise-box" class="student-exercise empty">
+      <div id="single-exercise-box" class="student-exercise empty">
         Oota — õpetaja postitab ülesande
       </div>
+      <span class="section-heading" id="single-answer-label" style="display:block; margin-bottom:12px;">Sinu vastus</span>
+      <div class="student-buttons" id="single-buttons">
+        <button data-answer="yes" disabled><span>Sain aru</span><span class="num">01</span></button>
+        <button data-answer="unsure" disabled><span>Pole kindel</span><span class="num">02</span></button>
+        <button data-answer="no" disabled><span>Ei saanud aru</span><span class="num">03</span></button>
+      </div>
 
-      <span class="section-heading" style="display: block; margin-bottom: 12px;">Sinu vastus</span>
-      <div class="student-buttons">
-        <button data-answer="yes" disabled>
-          <span>Sain aru</span>
-          <span class="num">01</span>
-        </button>
-        <button data-answer="unsure" disabled>
-          <span>Pole kindel</span>
-          <span class="num">02</span>
-        </button>
-        <button data-answer="no" disabled>
-          <span>Ei saanud aru</span>
-          <span class="num">03</span>
-        </button>
+      <!-- Multi-step parallel view (active when a step_set is received) -->
+      <div id="steps-container" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px;">
+          <span class="section-heading">Etapid</span>
+          <span class="mono" style="font-size:11px; color:var(--muted);">
+            Märgi ainult kohad, kus jäid kinni
+          </span>
+        </div>
+        <ol id="student-steps-list" class="student-steps-list"></ol>
       </div>
 
       <div class="student-status" id="status-line"></div>

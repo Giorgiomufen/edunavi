@@ -5,6 +5,7 @@
   let state = {
     roomCode: null,
     lessonId: null,
+    lessonStart: null,
     user: null,
     channel: null,
     currentExerciseId: null,
@@ -15,6 +16,33 @@
     chart: null,
     jitsi: null,
   };
+
+  // Persist active lesson so teacher can rejoin after refresh / accidental leave.
+  function persistActiveLesson() {
+    if (!state.lessonId || !state.roomCode) return;
+    try {
+      localStorage.setItem("edunavi-active-lesson", JSON.stringify({
+        lessonId: state.lessonId,
+        roomCode: state.roomCode,
+        startedAt: state.lessonStart || Date.now(),
+      }));
+    } catch (e) {}
+  }
+  function clearActiveLesson() {
+    try { localStorage.removeItem("edunavi-active-lesson"); } catch (e) {}
+  }
+  function getActiveLesson() {
+    try {
+      const v = localStorage.getItem("edunavi-active-lesson");
+      if (!v) return null;
+      const o = JSON.parse(v);
+      // Expire after 6 hours so we don't surface ancient sessions.
+      if (Date.now() - (o.startedAt || 0) > 6 * 60 * 60 * 1000) {
+        clearActiveLesson(); return null;
+      }
+      return o;
+    } catch (e) { return null; }
+  }
 
   function renderAuthUi() {
     const loading = $("top-auth-loading");
@@ -463,10 +491,49 @@
     if (steps.length === 0) return;
     hideStepsReview();
     $("exercise-input").value = "";
-    state.queuedSteps = steps;
-    state.queuedIndex = 0;
-    postQueuedStep();
-    showStepNav();
+
+    // Each student paces themselves through 300 students at once.
+    // Post the whole step set as a single broadcast — students see all steps and mark per step.
+    const stepSetId = EduNavi.newExerciseId();
+    const stepObjects = steps.map((stepText, i) => ({
+      id: EduNavi.newExerciseId(),
+      text: `${i + 1}. samm — ${stepText}`,
+      stepSetId,
+      stepIndex: i,
+      stepCount: steps.length,
+      ts: Date.now(),
+    }));
+
+    // Track these in teacher state so the chart aggregates correctly per step.
+    state.currentStepSet = { id: stepSetId, steps: stepObjects };
+    state.currentExerciseId = stepObjects[stepObjects.length - 1].id; // chart shows the latest
+    state.stats.exercises += stepObjects.length;
+    state.respondedSessions = new Set();
+
+    // Show the LAST step as "current exercise" — chart will fill from per-step responses
+    setCurrentExercise(stepObjects[stepObjects.length - 1].text);
+    resetCounts();
+    updateStats();
+    updateResponseRate();
+
+    // Broadcast as a single step_set event AND each as an exercise (for back-compat).
+    if (state.channel) {
+      state.channel.channel.send({
+        type: "broadcast",
+        event: "step_set",
+        payload: { stepSetId, steps: stepObjects, ts: Date.now() },
+      });
+      // Also broadcast each as exercise for any client that doesn't grok step_set yet.
+      stepObjects.forEach((ex) => {
+        state.channel.sendExercise(ex);
+      });
+      state.channel.updatePresence({ currentStepSet: { id: stepSetId, steps: stepObjects } });
+    }
+    if (state.lessonId) {
+      stepObjects.forEach((ex) => {
+        EduNaviDB.logExercise({ lessonId: state.lessonId, id: ex.id, text: ex.text });
+      });
+    }
   }
 
   function postQueuedStep() {
@@ -570,10 +637,10 @@
     input.focus();
   }
 
-  async function startLesson() {
-    const code = EduNavi.generateRoomCode();
+  async function startLesson(resume) {
+    const code = resume ? resume.roomCode : EduNavi.generateRoomCode();
     state.roomCode = code;
-    state.lessonStart = Date.now();
+    state.lessonStart = resume ? resume.startedAt : Date.now();
 
     $("start-screen").style.display = "none";
     $("app").style.display = "flex";
@@ -595,17 +662,21 @@
       return;
     }
 
-    // Persist the lesson row first so we can log exercises/responses against it.
-    const school = ($("school-input") && $("school-input").value.trim()) || null;
-    const className = ($("class-input") && $("class-input").value.trim()) || null;
-    const topic = ($("topic-input") && $("topic-input").value.trim()) || null;
-    state.lessonId = await EduNaviDB.createLesson({
-      roomCode: code,
-      teacherId: state.user ? state.user.id : null,
-      school,
-      className,
-      topic,
-    });
+    if (resume && resume.lessonId) {
+      state.lessonId = resume.lessonId;
+    } else {
+      const school = ($("school-input") && $("school-input").value.trim()) || null;
+      const className = ($("class-input") && $("class-input").value.trim()) || null;
+      const topic = ($("topic-input") && $("topic-input").value.trim()) || null;
+      state.lessonId = await EduNaviDB.createLesson({
+        roomCode: code,
+        teacherId: state.user ? state.user.id : null,
+        school,
+        className,
+        topic,
+      });
+    }
+    persistActiveLesson();
 
     state.channel = EduNavi.openRoomChannel(code, "teacher", {
       onResponse: (r) => {
@@ -663,6 +734,7 @@
   }
 
   function tearDown() {
+    clearActiveLesson();
     if (state.channel) state.channel.close();
     if (state.chart) { try { state.chart.destroy(); } catch (e) {} }
     if (state.jitsi) { try { state.jitsi.dispose(); } catch (e) {} }
@@ -696,7 +768,23 @@
 
   document.addEventListener("DOMContentLoaded", async () => {
     if (!EduNavi.isConfigured) EduNavi.showConfigBanner();
-    $("start-btn").addEventListener("click", startLesson);
+    $("start-btn").addEventListener("click", () => startLesson());
+
+    // Resume an unfinished lesson if there is one
+    const active = getActiveLesson();
+    if (active) {
+      $("resume-banner").style.display = "flex";
+      $("resume-banner-text").textContent = `Tuba ${active.roomCode}`;
+      $("resume-btn").addEventListener("click", () => startLesson(active));
+      $("resume-discard").addEventListener("click", () => {
+        if (state.lessonId == null) {
+          // Best-effort end the persisted lesson server-side, then clear
+          if (active.lessonId) EduNaviDB.endLesson(active.lessonId);
+        }
+        clearActiveLesson();
+        $("resume-banner").style.display = "none";
+      });
+    }
     // Kahoot-style: student can join from the same landing page
     const joinForm = $("join-form");
     if (joinForm) {

@@ -43,6 +43,17 @@
         <h1 class="display">EduNavi</h1>
         <p>Õpetaja otsustugi reaalajas.</p>
 
+        <div id="resume-banner" class="resume-banner" style="display:none;">
+          <div>
+            <span class="eyebrow" style="color:var(--live);">Lõpetamata tund</span>
+            <div id="resume-banner-text" style="font-family:'Barlow Condensed',sans-serif; font-size:18px; margin-top:4px;">Tuba ----</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="primary" id="resume-btn">Jätka tundi</button>
+            <button id="resume-discard">Lõpeta</button>
+          </div>
+        </div>
+
         <form id="join-form" class="join-hero">
           <label for="join-code-input" class="join-hero-label">Sisesta tunnikood</label>
           <input type="text" id="join-code-input" placeholder="ABCD" maxlength="4"

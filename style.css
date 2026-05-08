@@ -477,6 +477,22 @@ body.history-body {
   padding: 16px 48px;
   letter-spacing: 0.3em;
 }
+.resume-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--live);
+  background: rgba(0, 255, 136, 0.06);
+  margin-bottom: 22px;
+  text-align: left;
+}
+.resume-banner button { padding: 10px 18px; font-size: 11px; }
+@media (max-width: 600px) {
+  .resume-banner { flex-direction: column; align-items: stretch; gap: 12px; }
+}
+
 /* === Hero join input (Kahoot-style: PIN front and center) === */
 .join-hero {
   display: flex;
@@ -659,12 +675,14 @@ body.history-body {
   flex: 1;
   position: relative;
   overflow: hidden;
+  min-height: 0;
 }
 .tab-panel {
   position: absolute;
   inset: 0;
   display: none;
-  overflow: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .tab-panel.active { display: block; }
 
@@ -727,10 +745,17 @@ body.history-body {
 .lesson-grid {
   display: grid;
   grid-template-columns: 1fr 380px;
-  grid-template-rows: 1fr auto;
+  grid-template-rows: minmax(280px, 1fr) auto;
   width: 100%;
-  height: 100%;
+  min-height: 100%;
 }
+.lesson-input-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+}
+.steps-review { position: sticky; bottom: 0; z-index: 5; }
+.step-nav { position: sticky; bottom: 0; z-index: 5; }
 .lesson-video {
   grid-column: 1;
   grid-row: 1;
@@ -1158,6 +1183,55 @@ body.student-body { overflow-y: auto; height: auto; }
   font-weight: 500;
 }
 .student-status.ok { color: var(--live); }
+
+/* === Student step list (parallel voting) === */
+.student-steps-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.student-step {
+  border: 1px solid var(--line);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(255,255,255,0.02);
+}
+.student-step.answered { border-color: var(--line-strong); }
+.student-step.a-yes { border-color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.06); }
+.student-step.a-unsure { border-color: #888; background: rgba(136,136,136,0.08); }
+.student-step.a-no { border-color: var(--warn); background: rgba(255, 85, 56, 0.06); }
+.student-step-text {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px;
+  line-height: 1.3;
+  font-weight: 500;
+}
+.student-step-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.student-step-buttons button {
+  padding: 12px 8px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+}
+.student-step-buttons button:hover {
+  border-color: var(--text);
+  color: var(--text);
+  background: transparent;
+}
+.student-step.a-yes .student-step-buttons button[data-answer="yes"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.student-step.a-unsure .student-step-buttons button[data-answer="unsure"] { background: #888; color: var(--bg); border-color: #888; }
+.student-step.a-no .student-step-buttons button[data-answer="no"] { background: var(--warn); color: #fff; border-color: var(--warn); }
 
 .student-comment {
   margin-top: 26px;

@@ -10,6 +10,9 @@
     currentExerciseId: null,
     answered: false,
     jitsi: null,
+    activeStepSet: null,      // { id, steps: [{id, text}] }
+    perStepAnswers: {},       // exerciseId -> 'yes'|'no'|'unsure'
+    lessonEnded: false,
   };
 
   function startJitsi(roomCode) {
@@ -87,7 +90,8 @@
   }
 
   function setExercise(text) {
-    const box = $("exercise-box");
+    const box = $("single-exercise-box");
+    if (!box) return;
     if (text && text.trim()) {
       box.textContent = text;
       box.classList.remove("empty");
@@ -95,6 +99,85 @@
       box.textContent = "Oota — õpetaja postitab kohe ülesande…";
       box.classList.add("empty");
     }
+  }
+
+  function escapeHtml(s) {
+    return String(s || "").replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+    })[c]);
+  }
+
+  function showStepSetMode() {
+    const single = $("single-exercise-box");
+    const lbl = $("single-answer-label");
+    const sb = $("single-buttons");
+    if (single) single.style.display = "none";
+    if (lbl) lbl.style.display = "none";
+    if (sb) sb.style.display = "none";
+    $("steps-container").style.display = "block";
+  }
+
+  function showSingleMode() {
+    const single = $("single-exercise-box");
+    const lbl = $("single-answer-label");
+    const sb = $("single-buttons");
+    if (single) single.style.display = "";
+    if (lbl) lbl.style.display = "";
+    if (sb) sb.style.display = "";
+    $("steps-container").style.display = "none";
+  }
+
+  function renderStudentSteps(steps) {
+    const list = $("student-steps-list");
+    list.innerHTML = "";
+    steps.forEach((step) => {
+      const li = document.createElement("li");
+      li.className = "student-step";
+      li.dataset.stepId = step.id;
+      li.innerHTML = `
+        <div class="student-step-text">${escapeHtml(step.text)}</div>
+        <div class="student-step-buttons">
+          <button data-answer="yes">Sain aru</button>
+          <button data-answer="unsure">Pole kindel</button>
+          <button data-answer="no">Ei saanud aru</button>
+        </div>
+      `;
+      li.querySelectorAll("button").forEach((b) => {
+        b.addEventListener("click", () => answerStep(step.id, b.getAttribute("data-answer"), li));
+      });
+      list.appendChild(li);
+    });
+  }
+
+  function answerStep(exerciseId, answer, li) {
+    state.perStepAnswers[exerciseId] = answer;
+    li.classList.remove("a-yes", "a-no", "a-unsure");
+    li.classList.add("answered", `a-${answer}`);
+    if (state.channel) {
+      state.channel.sendResponse({
+        exerciseId, answer,
+        sessionId: state.sessionId,
+        ts: Date.now(),
+      });
+    }
+    if (state.lessonId) {
+      EduNaviDB.logResponse({
+        lessonId: state.lessonId,
+        exerciseId,
+        sessionId: state.sessionId,
+        answer,
+      });
+    }
+  }
+
+  function applyStepSet(set) {
+    if (!set || !set.steps || set.steps.length === 0) return;
+    if (state.activeStepSet && state.activeStepSet.id === set.id) return;
+    state.activeStepSet = set;
+    state.perStepAnswers = {};
+    showStepSetMode();
+    renderStudentSteps(set.steps);
+    setStatus("");
   }
 
   function enableButtons(enabled) {
@@ -163,7 +246,15 @@
 
     function applyExercise(ex) {
       if (!ex || !ex.id) return;
-      if (state.currentExerciseId === ex.id) return; // already showing this one
+      // If this exercise is part of the active step set, ignore — we're in step list mode.
+      if (state.activeStepSet && state.activeStepSet.steps.some((s) => s.id === ex.id)) return;
+      // Otherwise this is a single exercise → switch to single mode
+      if (state.activeStepSet) {
+        state.activeStepSet = null;
+        state.perStepAnswers = {};
+        showSingleMode();
+      }
+      if (state.currentExerciseId === ex.id) return;
       state.currentExerciseId = ex.id;
       state.answered = false;
       setExercise(ex.text);
@@ -173,14 +264,17 @@
 
     state.channel = EduNavi.openRoomChannel(code, "student", {
       onExercise: applyExercise,
+      onStepSet: applyStepSet,
       onReset: () => {
         state.answered = false;
         enableButtons(!!state.currentExerciseId);
         setStatus("");
       },
       onPresence: (_count, _state, teacherState) => {
-        // Late-joiner sync: pull the current exercise from the teacher's presence.
-        if (teacherState && teacherState.currentExercise) {
+        // Late-joiner sync: pull current exercise OR step set from teacher's presence.
+        if (teacherState && teacherState.currentStepSet) {
+          applyStepSet(teacherState.currentStepSet);
+        } else if (teacherState && teacherState.currentExercise) {
           applyExercise(teacherState.currentExercise);
         }
       },
