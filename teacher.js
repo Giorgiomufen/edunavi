@@ -164,11 +164,14 @@
         disableThirdPartyRequests: true,
         enableNoisyMicDetection: false,
         hideConferenceSubject: true,
-        hideConferenceTimer: false,
+        hideConferenceTimer: true,
+        hideParticipantsStats: true,
         disableProfile: true,
         readOnlyName: true,
-        toolbarButtons: ["microphone", "camera", "desktop", "tileview", "fullscreen", "hangup"],
+        disableSelfView: false,
+        toolbarButtons: [],
         notifications: [],
+        defaultLanguage: "et",
       },
       interfaceConfigOverwrite: {
         SHOW_JITSI_WATERMARK: false,
@@ -181,14 +184,34 @@
         DEFAULT_BACKGROUND: "#000000",
         DEFAULT_REMOTE_DISPLAY_NAME: "Õpilane",
         DEFAULT_LOCAL_DISPLAY_NAME: "Õpetaja",
-        TOOLBAR_BUTTONS: ["microphone", "camera", "desktop", "tileview", "fullscreen", "hangup"],
+        TOOLBAR_BUTTONS: [],
         DISABLE_PRESENCE_STATUS: true,
         DISABLE_FOCUS_INDICATOR: true,
         GENERATE_ROOMNAMES_ON_WELCOME_PAGE: false,
         HIDE_DEEP_LINKING_LOGO: true,
         DISABLE_VIDEO_BACKGROUND: true,
+        DISABLE_DOMINANT_SPEAKER_INDICATOR: true,
+        DISABLE_TRANSCRIPTION_SUBTITLES: true,
+        DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
+        SHOW_DEEP_LINKING_IMAGE: false,
       },
     });
+
+    state.jitsi.addListener("audioMuteStatusChanged", (e) => {
+      const btn = $("mic-btn");
+      btn.dataset.on = String(!e.muted);
+    });
+    state.jitsi.addListener("videoMuteStatusChanged", (e) => {
+      const btn = $("cam-btn");
+      btn.dataset.on = String(!e.muted);
+    });
+  }
+
+  function toggleAudio() {
+    if (state.jitsi) state.jitsi.executeCommand("toggleAudio");
+  }
+  function toggleVideo() {
+    if (state.jitsi) state.jitsi.executeCommand("toggleVideo");
   }
 
   function postExercise() {
@@ -285,6 +308,8 @@
     $("post-btn").addEventListener("click", postExercise);
     $("reset-btn").addEventListener("click", manualReset);
     $("end-btn").addEventListener("click", endLesson);
+    $("mic-btn").addEventListener("click", toggleAudio);
+    $("cam-btn").addEventListener("click", toggleVideo);
     $("exercise-input").addEventListener("keydown", (e) => {
       if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();

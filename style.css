@@ -216,8 +216,23 @@ textarea { resize: none; line-height: 1.4; }
 .app-header .right {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 12px;
   justify-self: end;
+}
+.ctrl-btn {
+  padding: 10px 16px;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+}
+.ctrl-btn[data-on="false"] {
+  background: var(--warn);
+  border-color: var(--warn);
+  color: #fff;
+}
+.ctrl-btn[data-on="false"]:hover:not(:disabled) {
+  background: transparent;
+  color: var(--warn);
+  border-color: var(--warn);
 }
 .tabs {
   display: flex;
