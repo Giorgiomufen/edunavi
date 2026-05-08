@@ -847,6 +847,54 @@
     });
   }
 
+  // Convert the lesson's per-step responses into a roster the /class view
+  // can analyse. Yes/unsure/no map to correct/partial/wrong; missing → blank.
+  function buildLiveRoster() {
+    const exerciseIds = state.exerciseOrder;
+    if (exerciseIds.length === 0) return null;
+
+    // Collect every session that ever responded
+    const allSessions = new Set();
+    exerciseIds.forEach((exId) => {
+      const m = state.perStepResponses[exId] || {};
+      Object.keys(m).forEach((sid) => allSessions.add(sid));
+    });
+    if (allSessions.size === 0) return null;
+
+    const ANS_TO_CELL = { yes: "correct", unsure: "partial", no: "wrong" };
+    const sessions = Array.from(allSessions);
+    const roster = sessions.map((sid, i) => ({
+      name: `Õpilane ${i + 1}`,
+      sessionId: sid,
+      results: exerciseIds.map((exId) => {
+        const ans = (state.perStepResponses[exId] || {})[sid];
+        return ANS_TO_CELL[ans] || "blank";
+      }),
+    }));
+    const exercises = exerciseIds.map((exId, i) => ({
+      id: exId,
+      text: state.exerciseTextById[exId] || `Etapp ${i + 1}`,
+      skill: "samm",
+    }));
+    return {
+      roster,
+      exercises,
+      meta: {
+        schoolName: "Reaalajas tund",
+        className: state.roomCode || "",
+        topic: "Live tagasiside",
+        lessonDate: new Date().toLocaleDateString("et-EE"),
+      },
+    };
+  }
+
+  function persistLiveRoster() {
+    try {
+      const r = buildLiveRoster();
+      if (r) sessionStorage.setItem("edunavi-live-roster", JSON.stringify(r));
+    } catch (e) {}
+  }
+
   function showLessonSummary(start) {
     const end = Date.now();
     const ms = end - start;
@@ -900,6 +948,8 @@
     // Tell students the lesson has ended BEFORE closing the channel.
     if (state.channel) state.channel.sendLessonEnd({ at: Date.now() });
     if (state.lessonId) EduNaviDB.endLesson(state.lessonId);
+    // Snapshot the live data so /class can show buckets from this exact lesson.
+    persistLiveRoster();
     const startTs = state.lessonStart || Date.now();
     showLessonSummary(startTs);
   }

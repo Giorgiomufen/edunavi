@@ -120,10 +120,33 @@
     return { headline, detail, actions };
   }
 
+  function readLiveRoster() {
+    try {
+      const v = sessionStorage.getItem("edunavi-live-roster");
+      if (!v) return null;
+      const o = JSON.parse(v);
+      if (!o || !o.roster || !o.exercises) return null;
+      return o;
+    } catch (e) { return null; }
+  }
+
+  function isLiveMode() {
+    return new URLSearchParams(window.location.search).get("live") === "1";
+  }
+
   function render() {
-    const idx = state.rosterIndex % D.ROSTERS.length;
-    const roster = D.ROSTERS[idx];
-    const exercises = D.EXERCISES;
+    let roster, exercises, meta;
+    const live = isLiveMode() ? readLiveRoster() : null;
+    if (live) {
+      roster = live.roster;
+      exercises = live.exercises;
+      meta = live.meta;
+    } else {
+      const idx = state.rosterIndex % D.ROSTERS.length;
+      roster = D.ROSTERS[idx];
+      exercises = D.EXERCISES;
+      meta = D.META;
+    }
     const classified = roster.map((s) => classifyOne(s, exercises));
 
     // Group into buckets
@@ -134,9 +157,9 @@
     $("count-need").textContent = buckets.need.length;
     $("count-mid").textContent = buckets.mid.length;
     $("count-ready").textContent = buckets.ready.length;
-    $("meta-class").textContent = `${D.META.schoolName} · ${D.META.className}`;
-    $("meta-topic").textContent = `Teema: ${D.META.topic}`;
-    $("meta-students").textContent = `${classified.length} õpilast`;
+    $("meta-class").textContent = `${meta.schoolName || ""} · ${meta.className || ""}`.replace(/^ · | · $/g, "");
+    $("meta-topic").textContent = meta.topic ? `Teema: ${meta.topic}` : "";
+    $("meta-students").textContent = `${classified.length} õpilast${live ? " · reaalajas tunnist" : ""}`;
 
     // Bucket lists
     fillList($("list-need"), buckets.need);
@@ -247,6 +270,12 @@
   document.addEventListener("DOMContentLoaded", () => {
     if (!D) return;
     $("reload-btn").addEventListener("click", () => {
+      // If we landed in live-data mode, "Uus näidis" returns to the mock library.
+      if (isLiveMode()) {
+        const u = new URL(window.location.href);
+        u.searchParams.delete("live");
+        history.replaceState({}, "", u.toString());
+      }
       state.rosterIndex = (state.rosterIndex + 1) % D.ROSTERS.length;
       render();
     });
