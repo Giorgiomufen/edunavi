@@ -138,6 +138,31 @@
     $("num-yes").textContent = state.counts.yes;
     $("num-unsure").textContent = state.counts.unsure;
     $("num-no").textContent = state.counts.no;
+    updateIntervention();
+  }
+
+  function updateIntervention() {
+    const card = $("intervention-card");
+    if (!card) return;
+    const total = state.counts.yes + state.counts.unsure + state.counts.no;
+    if (total < 3) { card.style.display = "none"; return; }
+    const noPct = state.counts.no / total;
+    const unsurePct = state.counts.unsure / total;
+    const yesPct = state.counts.yes / total;
+    let msg = null;
+    if (noPct >= 0.5) {
+      msg = `Peatu ja selgita seda etappi uuesti — ${Math.round(noPct * 100)}% ei saanud aru.`;
+    } else if (unsurePct >= 0.4 && yesPct < 0.5) {
+      msg = `Anna üks lisaharjutus — ${Math.round(unsurePct * 100)}% pole kindel.`;
+    } else if (noPct + unsurePct >= 0.5) {
+      msg = `Vähemalt pool klassist vajab tuge. Suuna kohapealne abiõpetaja kahtleja juurde.`;
+    }
+    if (msg) {
+      $("intervention-text").textContent = msg;
+      card.style.display = "flex";
+    } else {
+      card.style.display = "none";
+    }
   }
 
   function resetCounts() {

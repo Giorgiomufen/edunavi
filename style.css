@@ -701,6 +701,10 @@ body.history-body {
   flex-direction: column;
   gap: 12px;
 }
+.sidebar-card.intervention {
+  border-color: var(--warn);
+  background: rgba(255, 85, 56, 0.08);
+}
 .join-card-mini {
   display: grid;
   grid-template-columns: 92px 1fr;
