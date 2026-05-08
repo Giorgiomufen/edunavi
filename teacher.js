@@ -301,6 +301,53 @@
     if (state.channel) state.channel.sendReset({ exerciseId: state.currentExerciseId });
   }
 
+  // Post each newline as a separate exercise, with a delay between them.
+  // Lets the teacher decompose a problem into steps without needing AI.
+  async function postSteps() {
+    const input = $("exercise-input");
+    const lines = input.value
+      .split(/\r?\n/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (lines.length === 0) return;
+    if (lines.length === 1) {
+      postExercise();
+      return;
+    }
+    const btn = $("post-steps-btn");
+    const post = $("post-btn");
+    btn.disabled = true; post.disabled = true; input.disabled = true;
+    const orig = btn.textContent;
+    for (let i = 0; i < lines.length; i++) {
+      btn.textContent = `Samm ${i + 1}/${lines.length}…`;
+      // Show this step as the current exercise + broadcast it.
+      const text = `${i + 1}. samm — ${lines[i]}`;
+      const exercise = { id: EduNavi.newExerciseId(), text, ts: Date.now() };
+      state.currentExerciseId = exercise.id;
+      state.stats.exercises++;
+      state.respondedSessions = new Set();
+      setCurrentExercise(text);
+      resetCounts();
+      updateStats();
+      updateResponseRate();
+      if (state.channel) {
+        state.channel.sendExercise(exercise);
+        state.channel.updatePresence({ currentExercise: exercise });
+      }
+      if (state.lessonId) {
+        EduNaviDB.logExercise({ lessonId: state.lessonId, id: exercise.id, text });
+      }
+      // Wait for students to answer before moving on. 4s is short but demoable.
+      if (i < lines.length - 1) {
+        await new Promise((r) => setTimeout(r, 4000));
+      }
+    }
+    btn.textContent = orig;
+    btn.disabled = false; post.disabled = false; input.disabled = false;
+    input.value = "";
+    input.focus();
+  }
+
   async function startLesson() {
     const code = EduNavi.generateRoomCode();
     state.roomCode = code;
@@ -418,6 +465,7 @@
     if (!EduNavi.isConfigured) EduNavi.showConfigBanner();
     $("start-btn").addEventListener("click", startLesson);
     $("post-btn").addEventListener("click", postExercise);
+    $("post-steps-btn").addEventListener("click", postSteps);
     $("reset-btn").addEventListener("click", manualReset);
     $("end-btn").addEventListener("click", endLesson);
     $("mic-btn").addEventListener("click", toggleAudio);
