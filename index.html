@@ -15,7 +15,19 @@
       <div class="start-card">
         <h1 class="display">EduNavi</h1>
         <p>Õpetaja otsustugi reaalajas.</p>
-        <button class="primary start-button" id="start-btn">Alusta tundi</button>
+        <div id="auth-area">
+          <div id="signed-out" style="display:none;">
+            <button class="primary start-button" id="signin-btn">Logi sisse Google'iga</button>
+            <p class="muted-line" style="margin-top:18px; font-size:12px; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted-2);">Vajalik tunni alustamiseks</p>
+          </div>
+          <div id="signed-in" style="display:none;">
+            <p class="welcome-line" style="margin-bottom:8px; color:var(--muted); font-size:13px;">Sisse logitud</p>
+            <p id="user-email" style="margin-top:0; margin-bottom:24px; font-family:'JetBrains Mono', monospace; font-size:13px;"></p>
+            <button class="primary start-button" id="start-btn">Alusta tundi</button>
+            <p style="margin-top:18px;"><button id="signout-btn" style="font-size:11px; padding:8px 16px;">Logi välja</button></p>
+          </div>
+          <div id="auth-loading" style="color:var(--muted); font-size:12px; letter-spacing:0.2em; text-transform:uppercase;">kontrollin sessiooni</div>
+        </div>
       </div>
     </div>
 
@@ -113,6 +125,7 @@
     <script src="config.js"></script>
     <script src="shared.js"></script>
     <script src="db.js"></script>
+    <script src="auth.js"></script>
     <script src="teacher.js"></script>
   </body>
 </html>

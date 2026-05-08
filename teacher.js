@@ -5,6 +5,7 @@
   let state = {
     roomCode: null,
     lessonId: null,
+    user: null,
     channel: null,
     currentExerciseId: null,
     counts: { yes: 0, unsure: 0, no: 0 },
@@ -12,6 +13,21 @@
     chart: null,
     jitsi: null,
   };
+
+  function renderAuthUi() {
+    const out = $("signed-out");
+    const inE = $("signed-in");
+    const loading = $("auth-loading");
+    if (loading) loading.style.display = "none";
+    if (state.user) {
+      out.style.display = "none";
+      inE.style.display = "block";
+      $("user-email").textContent = state.user.email || state.user.id;
+    } else {
+      out.style.display = "block";
+      inE.style.display = "none";
+    }
+  }
 
   function updateStats() {
     $("stat-exercises").textContent = state.stats.exercises;
@@ -271,7 +287,10 @@
     }
 
     // Persist the lesson row first so we can log exercises/responses against it.
-    state.lessonId = await EduNaviDB.createLesson({ roomCode: code });
+    state.lessonId = await EduNaviDB.createLesson({
+      roomCode: code,
+      teacherId: state.user ? state.user.id : null,
+    });
 
     state.channel = EduNavi.openRoomChannel(code, "teacher", {
       onResponse: (r) => {
@@ -311,7 +330,7 @@
     $("start-screen").style.display = "grid";
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
     if (!EduNavi.isConfigured) EduNavi.showConfigBanner();
     $("start-btn").addEventListener("click", startLesson);
     $("post-btn").addEventListener("click", postExercise);
@@ -319,11 +338,30 @@
     $("end-btn").addEventListener("click", endLesson);
     $("mic-btn").addEventListener("click", toggleAudio);
     $("cam-btn").addEventListener("click", toggleVideo);
+    $("signin-btn").addEventListener("click", () => EduNaviAuth.signInWithGoogle());
+    $("signout-btn").addEventListener("click", async () => {
+      await EduNaviAuth.signOut();
+    });
     $("exercise-input").addEventListener("keydown", (e) => {
       if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         postExercise();
       }
     });
+
+    // Auth bootstrap
+    if (EduNavi.isConfigured) {
+      state.user = await EduNaviAuth.getUser();
+      renderAuthUi();
+      EduNaviAuth.onAuthChange((user) => {
+        state.user = user;
+        renderAuthUi();
+      });
+    } else {
+      // Without Supabase, allow anonymous "demo" use so the layout is still testable.
+      $("auth-loading").style.display = "none";
+      $("signed-in").style.display = "block";
+      $("user-email").textContent = "demo (Supabase pole seadistatud)";
+    }
   });
 })();
