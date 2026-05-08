@@ -399,6 +399,41 @@ body.class-body {
 .grid-table tr.row-mid .name  { color: #f7d96a; }
 .grid-table tr.row-ready .name { color: #6ee7a8; }
 
+/* Algorithm transparency disclosure */
+.algo-note {
+  border: 1px solid var(--line);
+  padding: 16px 20px;
+}
+.algo-note summary {
+  cursor: pointer;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.algo-note summary:hover { color: var(--text); }
+.algo-body {
+  margin-top: 14px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--muted);
+  max-width: 720px;
+}
+.algo-body strong { color: var(--text); }
+.algo-body ol, .algo-body ul {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+.algo-body li { margin-bottom: 6px; }
+.algo-foot {
+  margin-top: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--muted-2);
+}
+
 /* Hidden patterns */
 .patterns {
   border-top: 1px solid var(--line);

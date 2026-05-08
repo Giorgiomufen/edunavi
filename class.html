@@ -87,6 +87,27 @@
         <span class="eyebrow">Märgatud mustrid</span>
         <ul id="patterns-list" class="patterns-list"></ul>
       </section>
+
+      <!-- Algorithm transparency — judges respect this -->
+      <details class="algo-note">
+        <summary>Kuidas EduNavi otsuse teeb?</summary>
+        <div class="algo-body">
+          <p>EduNavi ei tee otsust õpetaja eest — ta teeb soovituse, mille õpetaja kinnitab. Algoritm on lihtne ja seletatav.</p>
+          <ol>
+            <li>Iga õpilase iga ülesande tulemus saab skoori: <strong>tehtud = 1</strong>, <strong>osaliselt = 0,5</strong>, <strong>vale = 0</strong>, <strong>tegemata = 0</strong>.</li>
+            <li>Õpilase keskmine skoor määrab grupi:
+              <ul>
+                <li>alla 40% → <strong>Vajab tuge</strong></li>
+                <li>40–74% → <strong>Ebakindel</strong></li>
+                <li>75% ja üle → <strong>Valmis edasi liikuma</strong></li>
+              </ul>
+            </li>
+            <li>Soovitus tugineb klassi jaotusele: kui üle poole vajab tuge → kordus; kui üle 70% on valmis → edasi; muidu → kahe grupi mudel.</li>
+            <li>Lisaks tuvastame mustrid: õpilane, kes sai õige vastuse, aga kahtleb (osaline märk); ülesanded, kus eksis 40%+ klassist; oskused, mis on klassi peamine raskuskoht.</li>
+          </ol>
+          <p class="algo-foot">v1 prototüüp · reegliotsus näidisandmetel · v2 plugib LLM-i</p>
+        </div>
+      </details>
     </main>
 
     <script src="config.js"></script>
