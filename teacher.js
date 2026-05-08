@@ -687,8 +687,9 @@
 
   function endLesson() {
     if (!confirm("Kas lõpetada tund?")) return;
+    // Tell students the lesson has ended BEFORE closing the channel.
+    if (state.channel) state.channel.sendLessonEnd({ at: Date.now() });
     if (state.lessonId) EduNaviDB.endLesson(state.lessonId);
-    // Snapshot the start time before we tear down so duration math is right.
     const startTs = state.lessonStart || Date.now();
     showLessonSummary(startTs);
   }
@@ -696,6 +697,20 @@
   document.addEventListener("DOMContentLoaded", async () => {
     if (!EduNavi.isConfigured) EduNavi.showConfigBanner();
     $("start-btn").addEventListener("click", startLesson);
+    // Kahoot-style: student can join from the same landing page
+    const joinForm = $("join-form");
+    if (joinForm) {
+      const ji = $("join-code-input");
+      ji.addEventListener("input", () => {
+        ji.value = ji.value.toUpperCase().replace(/[^A-Z]/g, "");
+      });
+      joinForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const code = ji.value.toUpperCase().trim();
+        if (!/^[A-Z]{4}$/.test(code)) { ji.focus(); return; }
+        window.location.href = `student.html?room=${encodeURIComponent(code)}`;
+      });
+    }
     $("post-btn").addEventListener("click", postExercise);
     $("propose-btn").addEventListener("click", proposeSteps);
     $("steps-cancel").addEventListener("click", hideStepsReview);

@@ -72,9 +72,11 @@
     const pill = $("conn-pill");
     const text = $("conn-text");
     pill.classList.remove("live");
-    if (status === "SUBSCRIBED") {
+    if (status === "SUBSCRIBED" && !state.lessonEnded) {
       pill.classList.add("live");
       text.textContent = "Eetris";
+    } else if (status === "ENDED" || state.lessonEnded) {
+      text.textContent = "Tund lõppenud";
     } else if (status === "DEMO_MODE") {
       text.textContent = "Demo režiim";
     } else if (status === "CHANNEL_ERROR") {
@@ -181,6 +183,15 @@
         if (teacherState && teacherState.currentExercise) {
           applyExercise(teacherState.currentExercise);
         }
+      },
+      onLessonEnd: () => {
+        state.lessonEnded = true;
+        enableButtons(false);
+        setExercise("Õpetaja lõpetas tunni.");
+        setStatus("Tund on lõppenud — võid sulgeda.", false);
+        setConnection("ENDED");
+        if (state.channel) { try { state.channel.close(); } catch (e) {} state.channel = null; }
+        if (state.jitsi) { try { state.jitsi.dispose(); } catch (e) {} state.jitsi = null; }
       },
       onStatus: setConnection,
     });

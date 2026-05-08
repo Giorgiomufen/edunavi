@@ -134,6 +134,9 @@
     channel.on("broadcast", { event: "comment" }, (payload) => {
       handlers.onComment && handlers.onComment(payload.payload);
     });
+    channel.on("broadcast", { event: "lesson_end" }, (payload) => {
+      handlers.onLessonEnd && handlers.onLessonEnd(payload.payload || {});
+    });
 
     channel.on("presence", { event: "sync" }, () => {
       const state = channel.presenceState();
@@ -164,6 +167,8 @@
         channel.send({ type: "broadcast", event: "reset", payload: data }),
       sendComment: (data) =>
         channel.send({ type: "broadcast", event: "comment", payload: data }),
+      sendLessonEnd: (data = {}) =>
+        channel.send({ type: "broadcast", event: "lesson_end", payload: data }),
       updatePresence: async (extra) => {
         currentTrack = { ...currentTrack, ...extra };
         return channel.track(currentTrack);

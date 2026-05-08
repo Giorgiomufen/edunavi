@@ -477,6 +477,45 @@ body.history-body {
   padding: 16px 48px;
   letter-spacing: 0.3em;
 }
+.cta-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.cta-divider {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+.join-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.join-row input {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 22px !important;
+  letter-spacing: 0.2em !important;
+  text-align: center !important;
+  text-transform: uppercase;
+  border: 1px solid var(--line) !important;
+  background: rgba(255,255,255,0.02) !important;
+  padding: 10px 12px !important;
+  width: 130px !important;
+}
+.join-row input:focus { border-color: var(--text) !important; }
+.join-row button {
+  padding: 14px 22px;
+  font-size: 12px;
+}
+@media (max-width: 600px) {
+  .cta-row { flex-direction: column; gap: 12px; }
+  .cta-divider { font-size: 10px; }
+}
 .start-details {
   margin-top: 24px;
   text-align: left;

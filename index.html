@@ -26,9 +26,20 @@
       <div class="start-card">
         <h1 class="display">EduNavi</h1>
         <p>Õpetaja otsustugi reaalajas.</p>
-        <button class="primary start-button" id="start-btn">Alusta tundi</button>
+
+        <div class="cta-row">
+          <button class="primary start-button" id="start-btn">Alusta tundi</button>
+          <span class="cta-divider">või</span>
+          <form id="join-form" class="join-row">
+            <input type="text" id="join-code-input" placeholder="ABCD" maxlength="4"
+              autocomplete="off" autocorrect="off" spellcheck="false"
+              autocapitalize="characters" />
+            <button type="submit" id="join-go-btn">Liitu</button>
+          </form>
+        </div>
+
         <details class="start-details">
-          <summary>Lisaandmed (valikuline)</summary>
+          <summary>Lisaandmed (valikuline, õpetajale)</summary>
           <div class="start-details-grid">
             <input type="text" id="school-input" placeholder="Kool" autocomplete="organization" />
             <input type="text" id="class-input" placeholder="Klass" autocomplete="off" />
