@@ -4,6 +4,8 @@
 
   let state = {
     roomCode: null,
+    lessonId: null,
+    sessionId: null,
     channel: null,
     currentExerciseId: null,
     answered: false,
@@ -114,13 +116,25 @@
       state.channel.sendResponse({
         exerciseId: state.currentExerciseId,
         answer,
+        sessionId: state.sessionId,
         ts: Date.now(),
+      });
+    }
+    if (state.lessonId && state.currentExerciseId) {
+      EduNaviDB.logResponse({
+        lessonId: state.lessonId,
+        exerciseId: state.currentExerciseId,
+        sessionId: state.sessionId,
+        answer,
       });
     }
   }
 
-  function joinRoom(code) {
+  async function joinRoom(code) {
     state.roomCode = code;
+    state.sessionId = EduNaviDB && EduNaviDB.getOrCreateSessionId
+      ? EduNaviDB.getOrCreateSessionId()
+      : null;
     $("join-screen").style.display = "none";
     $("lesson-view").style.display = "block";
     $("room-label").textContent = `tuba ${code}`;
@@ -133,6 +147,16 @@
       enableButtons(true);
       setExercise("Demo: õpetaja postitab ülesande siia.");
       return;
+    }
+
+    // Look up lesson_id so we can persist responses + presence.
+    state.lessonId = await EduNaviDB.findLessonByRoom(code);
+    if (state.lessonId && state.sessionId) {
+      EduNaviDB.logPresence({
+        lessonId: state.lessonId,
+        sessionId: state.sessionId,
+        action: "join",
+      });
     }
 
     function applyExercise(ex) {
@@ -204,5 +228,34 @@
     } else {
       showJoinScreen();
     }
+
+    // Best-effort leave log — runs when the tab is closed or hidden.
+    // fetch with keepalive lets the request complete during unload AND lets us
+    // set the apikey/Authorization headers that Supabase requires.
+    function logLeave() {
+      if (!state.lessonId || !state.sessionId) return;
+      const cfg = window.EDUNAVI_CONFIG;
+      try {
+        fetch(`${cfg.SUPABASE_URL}/rest/v1/presence_events`, {
+          method: "POST",
+          keepalive: true,
+          headers: {
+            "Content-Type": "application/json",
+            apikey: cfg.SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${cfg.SUPABASE_ANON_KEY}`,
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify({
+            lesson_id: state.lessonId,
+            session_id: state.sessionId,
+            action: "leave",
+          }),
+        });
+      } catch (e) { /* ignore */ }
+    }
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") logLeave();
+    });
+    window.addEventListener("pagehide", logLeave);
   });
 })();

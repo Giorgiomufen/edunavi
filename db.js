@@ -1,0 +1,123 @@
+/* db.js — thin wrappers around Supabase Postgres writes for lesson logging */
+(function () {
+  function client() {
+    if (!window.EduNavi || !window.EduNavi.isConfigured) return null;
+    if (!window.supabase) return null;
+    if (!window._edunaviSb) {
+      const cfg = window.EDUNAVI_CONFIG;
+      window._edunaviSb = window.supabase.createClient(
+        cfg.SUPABASE_URL,
+        cfg.SUPABASE_ANON_KEY
+      );
+    }
+    return window._edunaviSb;
+  }
+
+  async function createLesson({ roomCode, topic, teacherId }) {
+    const c = client();
+    if (!c) return null;
+    const { data, error } = await c
+      .from("lessons")
+      .insert({
+        room_code: roomCode,
+        topic: topic || null,
+        teacher_id: teacherId || null,
+      })
+      .select("id")
+      .single();
+    if (error) {
+      console.warn("[db] createLesson failed", error);
+      return null;
+    }
+    return data.id;
+  }
+
+  async function endLesson(lessonId) {
+    const c = client();
+    if (!c || !lessonId) return;
+    const { error } = await c
+      .from("lessons")
+      .update({ ended_at: new Date().toISOString() })
+      .eq("id", lessonId);
+    if (error) console.warn("[db] endLesson failed", error);
+  }
+
+  async function logExercise({ lessonId, id, text }) {
+    const c = client();
+    if (!c || !lessonId) return null;
+    const row = { lesson_id: lessonId, text };
+    if (id) row.id = id;
+    const { data, error } = await c
+      .from("exercises")
+      .insert(row)
+      .select("id")
+      .single();
+    if (error) {
+      console.warn("[db] logExercise failed", error);
+      return null;
+    }
+    return data.id;
+  }
+
+  async function logResponse({ lessonId, exerciseId, sessionId, answer }) {
+    const c = client();
+    if (!c || !lessonId || !exerciseId) return;
+    const { error } = await c
+      .from("responses")
+      .insert({
+        lesson_id: lessonId,
+        exercise_id: exerciseId,
+        session_id: sessionId || null,
+        answer,
+      });
+    if (error) console.warn("[db] logResponse failed", error);
+  }
+
+  async function logPresence({ lessonId, sessionId, action }) {
+    const c = client();
+    if (!c || !lessonId || !sessionId) return;
+    const { error } = await c
+      .from("presence_events")
+      .insert({ lesson_id: lessonId, session_id: sessionId, action });
+    if (error) console.warn("[db] logPresence failed", error);
+  }
+
+  // Looks up the most recent active lesson for a given room code
+  // (for student-side: needs lesson_id to log against).
+  async function findLessonByRoom(roomCode) {
+    const c = client();
+    if (!c) return null;
+    const { data, error } = await c
+      .from("lessons")
+      .select("id")
+      .eq("room_code", roomCode)
+      .is("ended_at", null)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) {
+      console.warn("[db] findLessonByRoom failed", error);
+      return null;
+    }
+    return data ? data.id : null;
+  }
+
+  function getOrCreateSessionId() {
+    let sid = sessionStorage.getItem("edunavi-session");
+    if (!sid) {
+      sid = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+      sessionStorage.setItem("edunavi-session", sid);
+    }
+    return sid;
+  }
+
+  window.EduNaviDB = {
+    createLesson,
+    endLesson,
+    logExercise,
+    logResponse,
+    logPresence,
+    findLessonByRoom,
+    getOrCreateSessionId,
+  };
+})();

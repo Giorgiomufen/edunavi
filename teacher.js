@@ -4,6 +4,7 @@
 
   let state = {
     roomCode: null,
+    lessonId: null,
     channel: null,
     currentExerciseId: null,
     counts: { yes: 0, unsure: 0, no: 0 },
@@ -233,6 +234,9 @@
       state.channel.sendExercise(exercise);
       state.channel.updatePresence({ currentExercise: exercise });
     }
+    if (state.lessonId) {
+      EduNaviDB.logExercise({ lessonId: state.lessonId, id: exercise.id, text });
+    }
 
     input.value = "";
     input.focus();
@@ -243,7 +247,7 @@
     if (state.channel) state.channel.sendReset({ exerciseId: state.currentExerciseId });
   }
 
-  function startLesson() {
+  async function startLesson() {
     const code = EduNavi.generateRoomCode();
     state.roomCode = code;
 
@@ -266,6 +270,9 @@
       return;
     }
 
+    // Persist the lesson row first so we can log exercises/responses against it.
+    state.lessonId = await EduNaviDB.createLesson({ roomCode: code });
+
     state.channel = EduNavi.openRoomChannel(code, "teacher", {
       onResponse: (r) => {
         if (!state.currentExerciseId || r.exerciseId === state.currentExerciseId) {
@@ -286,11 +293,13 @@
 
   function endLesson() {
     if (!confirm("Kas lõpetada tund?")) return;
+    if (state.lessonId) EduNaviDB.endLesson(state.lessonId);
     if (state.channel) state.channel.close();
     if (state.chart) { try { state.chart.destroy(); } catch (e) {} }
     if (state.jitsi) { try { state.jitsi.dispose(); } catch (e) {} }
     state = {
       roomCode: null,
+      lessonId: null,
       channel: null,
       currentExerciseId: null,
       counts: { yes: 0, unsure: 0, no: 0 },
