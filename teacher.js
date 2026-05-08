@@ -428,6 +428,16 @@
         $("student-count").textContent = String(n);
         updateResponseRate();
       },
+      onComment: (c) => {
+        if (!c || !c.text) return;
+        const list = $("comments-list");
+        const li = document.createElement("li");
+        li.textContent = c.text;
+        list.insertBefore(li, list.firstChild);
+        // Keep only last 6 visible
+        while (list.children.length > 6) list.removeChild(list.lastChild);
+        $("comments-card").style.display = "flex";
+      },
       onStatus: setConnection,
     });
   }

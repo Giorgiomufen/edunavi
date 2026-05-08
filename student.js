@@ -222,6 +222,21 @@
       b.addEventListener("click", () => sendAnswer(b.getAttribute("data-answer")));
     });
 
+    const commentBtn = document.getElementById("comment-send-btn");
+    if (commentBtn) commentBtn.addEventListener("click", () => {
+      const ta = document.getElementById("comment-input");
+      const text = ta.value.trim();
+      if (!text || !state.channel) return;
+      state.channel.sendComment({
+        text,
+        sessionId: state.sessionId,
+        exerciseId: state.currentExerciseId,
+        ts: Date.now(),
+      });
+      ta.value = "";
+      setStatus("Kommentaar saadetud", true);
+    });
+
     const room = getRoomFromUrl();
     if (room) {
       joinRoom(room);
