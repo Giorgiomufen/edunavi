@@ -42,6 +42,13 @@ A: Ei. Õpilane saab tagasisidet anda ka kodutööd lahendades — tegelikud lü
 
 **Q: Mis on järgmine samm?**
 A: AI etapistus — õpetaja kleepib ülesande, AI pakub 3–7 lahenduslogikuks etappi, õpetaja kinnitab. Õpilane näeb etappe ja märgib täpse koha. See teeb klassipildist kuumakaardi.
+*(Kui aega lubab — klõpsa start-screen'il "Phase 2 eelvaade" linki, näita kuidas see välja näeb. URL: edunavi.vercel.app/preview.html)*
+
+**Q: Kus on AI?**
+A: Praeguses prototüübis on AI Phase 2. Phase 1 on andmekiht — me näitame, et õpilased oskavad signaali anda ja õpetaja näeb seda reaalajas. AI etapistuse eelvaade on edunavi.vercel.app/preview.html — see on järgmine kiht.
+
+**Q: Mis juhtub pärast tundi?**
+A: *(klõpsa Lõpeta)* Õpetaja näeb tunni kokkuvõtet. Sisse logitud õpetaja näeb kõiki oma tunde — *(navigeeri /history.html-le)* — ajalugu, andmed, mustrid mitme tunni vahel.
 
 **Q: Kas Tallinna haridusamet on kontekstis?**
 A: Jah. Idee tuli "Võimendatud õpetaja" piloodist — koolidel oli infrastruktuur, aga puudus pedagoogiline otsustugi. EduNavi täidab selle tühiku.
@@ -59,3 +66,30 @@ A: MVP-s ei salvesta me õpilase isikut. Sessioon, ülesanne, etapp, tagasiside,
 ## One thing to remember
 
 The demo's wow moment is silent. When the QR appears and the counter starts ticking, **don't fill the silence**. Let them scan. Let them feel it. Then talk.
+
+## Tomorrow-morning checklist
+
+**~15 minutes before pitch:**
+
+- [ ] Open `https://edunavi.vercel.app/` on the laptop driving the projector
+- [ ] Sign in with your account (so lesson gets saved + history works)
+- [ ] Click **Alusta tundi** once as a test → grant camera + mic in the Jitsi popup → confirm video shows up → click **Lõpeta** → confirm the summary modal appears → close it
+- [ ] Open your phone, scan the QR or open `https://edunavi.vercel.app/student.html?room=XXXX` to confirm the student page works on cellular (not just venue wifi)
+- [ ] Have one teammate already on `student.html` so the counter ticks 0 → 1 the moment you start (the counter being ≥1 prevents the awkward "is anyone here?" feeling if the audience is slow to scan)
+
+**Backup plan if internet dies:**
+- Phone screen-recording of the demo flow as a fallback video. Record one tonight after the deploy is stable.
+
+**During the pitch:**
+- Don't type — paste a pre-prepared exercise from your clipboard. Practice this.
+- Sample exercise that lands well: `Lahenda 7x − 5 = 16`. Short, classic, the math the audience can follow even if they're not teachers.
+
+**Failure modes you should be ready to laugh through:**
+- Vercel cold start → first page load may be slow. Warm it up by visiting the page 30 sec before pitching.
+- Jitsi prejoin overlay → click through it, ignore.
+- Audience phones can't scan → have the room code visible large; people can type it on `student.html`.
+- Empty chart for 10 seconds → fill the silence with the narrative ("üks õpetaja, sada õpilast, üks pilk").
+
+**The two URLs you should know by heart:**
+- `edunavi.vercel.app` — the live product
+- `edunavi.vercel.app/preview.html` — the Phase 2 mockup (click during Q&A if asked "where's the AI?")
