@@ -423,6 +423,117 @@ body.class-body {
 .patterns-list .pattern-topic-gap    { border-left-color: rgb(231, 76, 60); }
 .patterns-list .pattern-skill-gap    { border-left-color: rgb(231, 76, 60); }
 
+/* === Võimendatud õpetaja: multi-class grid === */
+body.classes-body { height: auto; overflow-y: auto; }
+.classes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 14px;
+}
+.class-card {
+  border: 1px solid var(--line);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.class-card.priority-critical {
+  border-color: rgba(231, 76, 60, 0.5);
+  background: rgba(231, 76, 60, 0.05);
+}
+.class-card.priority-watch {
+  border-color: rgba(241, 196, 15, 0.45);
+  background: rgba(241, 196, 15, 0.04);
+}
+.class-card.priority-ok {
+  border-color: rgba(46, 204, 113, 0.4);
+  background: rgba(46, 204, 113, 0.04);
+}
+.class-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.class-card-priority {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.class-card.priority-critical .class-card-priority { color: rgb(231, 76, 60); }
+.class-card.priority-watch .class-card-priority    { color: rgb(241, 196, 15); }
+.class-card.priority-ok .class-card-priority       { color: rgb(46, 204, 113); }
+.class-card-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 32px;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+.class-card-action {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-align: right;
+  color: var(--text);
+  max-width: 200px;
+}
+.class-card-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.class-card-stats .cstat {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+}
+.class-card-stats .cstat .num {
+  display: block;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1;
+}
+.class-card-stats .cstat .label {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.class-card-stats .cstat-need .num  { color: rgb(231, 76, 60); }
+.class-card-stats .cstat-mid .num   { color: rgb(241, 196, 15); }
+.class-card-stats .cstat-ready .num { color: rgb(46, 204, 113); }
+
+.class-card-bar {
+  display: flex;
+  height: 8px;
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+.class-card-bar .seg-need  { background: rgb(231, 76, 60); }
+.class-card-bar .seg-mid   { background: rgb(241, 196, 15); }
+.class-card-bar .seg-ready { background: rgb(46, 204, 113); }
+
+.class-card-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--muted);
+}
+.class-card-foot a { padding: 0; }
+
+.patterns-list .pattern-cross-class { border-left-color: rgb(241, 196, 15); }
+.patterns-list .pattern-global      { border-left-color: var(--line-strong); }
+
 /* === Tugiõpetaja mobile view === */
 body.tugi-body { height: auto; overflow-y: auto; background: var(--bg); }
 .tugi-header {

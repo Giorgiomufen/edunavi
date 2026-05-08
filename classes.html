@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="et">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EduNavi — võimendatud õpetaja</title>
+    <meta name="description" content="EduNavi võimendatud õpetajale — kõik klassid ühel pilgul, milline neist vajab kohe sekkumist." />
+    <meta name="theme-color" content="#000000" />
+    <link rel="canonical" href="https://edunavi.vercel.app/classes" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="EduNavi — võimendatud õpetaja" />
+    <meta property="og:description" content="Üks õpetaja, mitu klassi, üks pilk." />
+    <meta property="og:image" content="https://edunavi.vercel.app/og.svg" />
+    <meta property="og:locale" content="et_EE" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Ctext x='50%25' y='62%25' font-family='Arial' font-size='18' font-weight='700' fill='white' text-anchor='middle'%3EE%3C/text%3E%3C/svg%3E" />
+  </head>
+  <body class="classes-body">
+    <header class="class-header">
+      <a href="/" class="wordmark" style="border:0; color:var(--text);">EduNavi <small>Võimendatud õpetaja</small></a>
+      <div class="class-meta-bar">
+        <span class="mono">Tallinna 21. Kool</span>
+        <span class="mono">Teema: Murdude põhitehted</span>
+        <span class="mono" id="classes-count">— klassi</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <a href="/class" class="ghost-button" style="text-decoration:none; padding:10px 18px;">Üks klass</a>
+      </div>
+    </header>
+
+    <main class="class-main">
+      <section class="recommendation">
+        <span class="eyebrow">Sinu prioriteet praegu</span>
+        <h1 id="multi-headline" class="rec-headline">Laadin…</h1>
+        <p id="multi-detail" class="rec-detail"></p>
+      </section>
+
+      <section class="classes-grid" id="classes-grid"></section>
+
+      <section class="patterns">
+        <span class="eyebrow">Mitme klassi koondmuster</span>
+        <ul id="multi-patterns" class="patterns-list"></ul>
+      </section>
+    </main>
+
+    <script src="class-data.js"></script>
+    <script src="classes.js"></script>
+  </body>
+</html>
