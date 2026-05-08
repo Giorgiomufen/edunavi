@@ -399,6 +399,29 @@ body.class-body {
 .grid-table tr.row-mid .name  { color: #f7d96a; }
 .grid-table tr.row-ready .name { color: #6ee7a8; }
 
+/* === Print stylesheet for /class — paper handout format === */
+@media print {
+  body { background: white !important; color: black !important; height: auto !important; overflow: visible !important; }
+  body * { color: black !important; }
+  .class-header > div:last-child, .extra-links, .algo-note, .reload-btn { display: none !important; }
+  .recommendation { background: #f5f5f5 !important; border: 1px solid #999 !important; }
+  .bucket { background: white !important; border: 1px solid #999 !important; }
+  .bucket-need { border-color: #c00 !important; }
+  .bucket-mid  { border-color: #b80 !important; }
+  .bucket-ready { border-color: #060 !important; }
+  .bucket-need .bucket-dot { background: #c00 !important; box-shadow: none !important; }
+  .bucket-mid  .bucket-dot { background: #b80 !important; box-shadow: none !important; }
+  .bucket-ready .bucket-dot { background: #060 !important; box-shadow: none !important; }
+  .grid-table td.cell-correct::after { background: #060 !important; }
+  .grid-table td.cell-partial::after { background: #b80 !important; }
+  .grid-table td.cell-wrong::after   { background: #c00 !important; }
+  .grid-table td.cell-blank::after   { background: white !important; border: 1px solid #999 !important; }
+  .patterns-list .pattern { background: white !important; }
+  a { color: black !important; text-decoration: none !important; border: 0 !important; }
+  .class-main { padding: 0 !important; max-width: none !important; }
+  section { page-break-inside: avoid; }
+}
+
 /* Algorithm transparency disclosure */
 .algo-note {
   border: 1px solid var(--line);
