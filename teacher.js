@@ -304,6 +304,7 @@
   async function startLesson() {
     const code = EduNavi.generateRoomCode();
     state.roomCode = code;
+    state.lessonStart = Date.now();
 
     $("start-screen").style.display = "none";
     $("app").style.display = "flex";
@@ -358,24 +359,57 @@
     });
   }
 
-  function endLesson() {
-    if (!confirm("Kas lõpetada tund?")) return;
-    if (state.lessonId) EduNaviDB.endLesson(state.lessonId);
+  function showLessonSummary(start) {
+    const end = Date.now();
+    const ms = end - start;
+    const min = Math.round(ms / 60000);
+    const dur = min < 1 ? "<1 min" : (min < 60 ? min + " min" : Math.floor(min/60) + "h " + (min%60) + "m");
+    $("summary-room").textContent = state.roomCode || "----";
+    $("summary-duration").textContent = "kestus " + dur;
+    $("summary-students").textContent = state.studentCount || 0;
+    $("summary-exercises").textContent = state.stats.exercises;
+    $("summary-responses").textContent = state.stats.responses;
+    if (state.stats.responses > 0) {
+      const pct = Math.round((state.stats.yes / state.stats.responses) * 100);
+      $("summary-understanding").textContent = pct + "%";
+    } else {
+      $("summary-understanding").textContent = "—";
+    }
+    $("summary-meta").textContent = state.lessonId
+      ? "Salvestatud: lesson_id " + state.lessonId.slice(0, 8) + "…"
+      : "Salvestamata (Supabase pole seadistatud)";
+    $("summary-history-link").style.display = state.user && state.lessonId ? "inline-block" : "none";
+    $("summary-modal").classList.add("show");
+  }
+
+  function tearDown() {
     if (state.channel) state.channel.close();
     if (state.chart) { try { state.chart.destroy(); } catch (e) {} }
     if (state.jitsi) { try { state.jitsi.dispose(); } catch (e) {} }
+    const keepUser = state.user;
     state = {
       roomCode: null,
       lessonId: null,
+      user: keepUser,
       channel: null,
       currentExerciseId: null,
       counts: { yes: 0, unsure: 0, no: 0 },
       stats: { exercises: 0, responses: 0, yes: 0 },
+      studentCount: 0,
+      respondedSessions: new Set(),
       chart: null,
       jitsi: null,
     };
     $("app").style.display = "none";
     $("start-screen").style.display = "grid";
+  }
+
+  function endLesson() {
+    if (!confirm("Kas lõpetada tund?")) return;
+    if (state.lessonId) EduNaviDB.endLesson(state.lessonId);
+    // Snapshot the start time before we tear down so duration math is right.
+    const startTs = state.lessonStart || Date.now();
+    showLessonSummary(startTs);
   }
 
   document.addEventListener("DOMContentLoaded", async () => {
@@ -386,6 +420,10 @@
     $("end-btn").addEventListener("click", endLesson);
     $("mic-btn").addEventListener("click", toggleAudio);
     $("cam-btn").addEventListener("click", toggleVideo);
+    $("summary-close").addEventListener("click", () => {
+      $("summary-modal").classList.remove("show");
+      tearDown();
+    });
     function showAuthError(msg) { $("auth-error").textContent = msg || ""; }
     $("open-signin").addEventListener("click", openAuthModal);
     $("auth-close").addEventListener("click", closeAuthModal);

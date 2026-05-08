@@ -41,6 +41,28 @@
       </div>
     </div>
 
+    <!-- Lesson summary modal (shown when teacher ends a lesson) -->
+    <div id="summary-modal" class="modal-overlay">
+      <div class="modal-content summary-content">
+        <span class="eyebrow" style="display:block; margin-bottom:8px;">Tunni kokkuvõte</span>
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:24px;">
+          <h2 class="display" style="font-size:48px; margin:0;" id="summary-room">----</h2>
+          <span id="summary-duration" class="mono" style="font-size:13px; color:var(--muted);">—</span>
+        </div>
+        <div class="summary-grid">
+          <div class="summary-tile"><span class="num" id="summary-students">0</span><span class="label">Õpilast</span></div>
+          <div class="summary-tile"><span class="num" id="summary-exercises">0</span><span class="label">Ülesannet</span></div>
+          <div class="summary-tile"><span class="num" id="summary-responses">0</span><span class="label">Vastust</span></div>
+          <div class="summary-tile"><span class="num" id="summary-understanding">—</span><span class="label">Mõistetud</span></div>
+        </div>
+        <p id="summary-meta" class="mono" style="font-size:11px; color:var(--muted); margin:24px 0 8px;"></p>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+          <button class="primary" id="summary-close" style="flex:1;">Mine algusesse</button>
+          <a href="history.html" id="summary-history-link" class="btn-link" style="flex:1; text-align:center; padding:12px 22px; border:1px solid var(--line-strong); text-decoration:none; font-family:'Barlow Condensed', sans-serif; font-weight:600; font-size:12px; letter-spacing:0.22em; text-transform:uppercase; display:none;">Mine ajalukku</a>
+        </div>
+      </div>
+    </div>
+
     <!-- Login modal -->
     <div id="auth-modal" class="modal-overlay">
       <form class="modal-content auth-card" id="auth-form" autocomplete="on">
