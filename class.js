@@ -161,6 +161,19 @@
     $("meta-topic").textContent = meta.topic ? `Teema: ${meta.topic}` : "";
     $("meta-students").textContent = `${classified.length} õpilast${live ? " · reaalajas tunnist" : ""}`;
 
+    // Live badge: show only in live mode, with data age
+    const liveBadge = $("live-badge");
+    if (live && liveBadge) {
+      liveBadge.style.display = "inline-flex";
+      const snap = readLiveRoster();
+      if (snap && snap.ts) {
+        const ageMin = Math.round((Date.now() - snap.ts) / 60000);
+        $("live-age").textContent = ageMin <= 0 ? "äsja" : `${ageMin} min tagasi`;
+      }
+    } else if (liveBadge) {
+      liveBadge.style.display = "none";
+    }
+
     // Bucket lists
     fillList($("list-need"), buckets.need);
     fillList($("list-mid"), buckets.mid);

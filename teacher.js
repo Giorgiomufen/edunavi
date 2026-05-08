@@ -891,7 +891,10 @@
   function persistLiveRoster() {
     try {
       const r = buildLiveRoster();
-      if (r) sessionStorage.setItem("edunavi-live-roster", JSON.stringify(r));
+      if (r) {
+        r.ts = Date.now();
+        sessionStorage.setItem("edunavi-live-roster", JSON.stringify(r));
+      }
     } catch (e) {}
   }
 

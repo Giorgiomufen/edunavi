@@ -399,6 +399,28 @@ body.class-body {
 .grid-table tr.row-mid .name  { color: #f7d96a; }
 .grid-table tr.row-ready .name { color: #6ee7a8; }
 
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border: 1px solid var(--live);
+  background: rgba(0, 255, 136, 0.06);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--live);
+  align-self: flex-start;
+}
+.live-badge .live-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--live);
+  box-shadow: 0 0 0 4px rgba(0, 255, 136, 0.18);
+}
+.live-badge .mono { color: var(--muted); font-size: 10px; }
+
 /* === Print stylesheet for /class — paper handout format === */
 @media print {
   body { background: white !important; color: black !important; height: auto !important; overflow: visible !important; }
