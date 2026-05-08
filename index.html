@@ -16,12 +16,18 @@
         <h1 class="display">EduNavi</h1>
         <p>Õpetaja otsustugi reaalajas.</p>
         <div id="auth-area">
-          <div id="signed-out" style="display:none;">
-            <button class="primary start-button" id="signin-btn">Logi sisse Google'iga</button>
-            <p class="muted-line" style="margin-top:18px; font-size:12px; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted-2);">Vajalik tunni alustamiseks</p>
-          </div>
+          <form id="signed-out" style="display:none; text-align:left;" autocomplete="on">
+            <span class="eyebrow" style="display:block; margin-bottom:14px;">Logi sisse</span>
+            <input type="email" id="email-input" placeholder="email@kool.ee" autocomplete="email" required style="font-size:15px;" />
+            <input type="password" id="password-input" placeholder="parool" autocomplete="current-password" required style="font-size:15px; margin-top:14px;" />
+            <div id="auth-error" style="margin-top:10px; min-height:18px; color:var(--warn); font-size:12px; letter-spacing:0.05em;"></div>
+            <div style="display:flex; gap:10px; margin-top:18px;">
+              <button type="submit" class="primary" id="signin-btn" style="flex:1;">Logi sisse</button>
+              <button type="button" id="signup-btn" style="flex:1;">Loo konto</button>
+            </div>
+          </form>
           <div id="signed-in" style="display:none;">
-            <p class="welcome-line" style="margin-bottom:8px; color:var(--muted); font-size:13px;">Sisse logitud</p>
+            <p style="margin-bottom:8px; color:var(--muted); font-size:13px;">Sisse logitud</p>
             <p id="user-email" style="margin-top:0; margin-bottom:24px; font-family:'JetBrains Mono', monospace; font-size:13px;"></p>
             <button class="primary start-button" id="start-btn">Alusta tundi</button>
             <p style="margin-top:18px;"><button id="signout-btn" style="font-size:11px; padding:8px 16px;">Logi välja</button></p>

@@ -338,7 +338,33 @@
     $("end-btn").addEventListener("click", endLesson);
     $("mic-btn").addEventListener("click", toggleAudio);
     $("cam-btn").addEventListener("click", toggleVideo);
-    $("signin-btn").addEventListener("click", () => EduNaviAuth.signInWithGoogle());
+    function showAuthError(msg) {
+      const el = $("auth-error");
+      if (el) el.textContent = msg || "";
+    }
+    function readForm() {
+      return {
+        email: $("email-input").value.trim(),
+        password: $("password-input").value,
+      };
+    }
+    $("signed-out").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      showAuthError("");
+      const { email, password } = readForm();
+      if (!email || !password) return showAuthError("Sisesta email ja parool.");
+      const { error } = await EduNaviAuth.signInWithEmail(email, password);
+      if (error) showAuthError(error);
+    });
+    $("signup-btn").addEventListener("click", async () => {
+      showAuthError("");
+      const { email, password } = readForm();
+      if (!email || !password) return showAuthError("Sisesta email ja parool.");
+      if (password.length < 6) return showAuthError("Parool peab olema vähemalt 6 tähemärki.");
+      const { error } = await EduNaviAuth.signUpWithEmail(email, password);
+      if (error) showAuthError(error);
+      else showAuthError("Konto loodud — kontrolli oma postkasti kinnitamiseks (kui see on Supabase'is sisse lülitatud).");
+    });
     $("signout-btn").addEventListener("click", async () => {
       await EduNaviAuth.signOut();
     });

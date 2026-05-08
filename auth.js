@@ -34,6 +34,20 @@
     });
   }
 
+  async function signInWithEmail(email, password) {
+    const c = client();
+    if (!c) return { error: "no client" };
+    const { data, error } = await c.auth.signInWithPassword({ email, password });
+    return { data, error: error ? error.message : null };
+  }
+
+  async function signUpWithEmail(email, password) {
+    const c = client();
+    if (!c) return { error: "no client" };
+    const { data, error } = await c.auth.signUp({ email, password });
+    return { data, error: error ? error.message : null };
+  }
+
   async function signOut() {
     const c = client();
     if (!c) return;
@@ -52,6 +66,8 @@
   window.EduNaviAuth = {
     getUser,
     signInWithGoogle,
+    signInWithEmail,
+    signUpWithEmail,
     signOut,
     onAuthChange,
   };
