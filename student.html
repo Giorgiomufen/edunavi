@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="et">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>EduNavi — Õpilane</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Ctext x='50%25' y='62%25' font-family='Arial' font-size='18' font-weight='700' fill='white' text-anchor='middle'%3EE%3C/text%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <div class="banner" id="config-banner"></div>
+
+    <!-- Join screen (no ?room=) -->
+    <div id="join-screen" class="start-screen" style="display: none;">
+      <div class="start-card join-card">
+        <span class="eyebrow">Liitu tunniga</span>
+        <h1 class="display">EduNavi</h1>
+        <p>Sisesta õpetajalt saadud nelja-täheline kood.</p>
+        <input
+          type="text"
+          id="join-input"
+          class="join-input"
+          placeholder="ABCD"
+          maxlength="4"
+          autocapitalize="characters"
+          autocorrect="off"
+          spellcheck="false"
+        />
+        <button class="primary" id="join-btn">Liitu</button>
+      </div>
+    </div>
+
+    <!-- Lesson view -->
+    <div id="lesson-view" class="student-shell" style="display: none;">
+      <div class="student-header">
+        <div class="wordmark">EduNavi <small id="room-label">tuba ----</small></div>
+        <span class="pill" id="conn-pill"><span id="conn-text">ühendamine</span></span>
+      </div>
+
+      <div class="student-video">
+        <iframe
+          id="jitsi-frame"
+          allow="camera; microphone; fullscreen; display-capture; autoplay"
+          title="Live lesson video"
+        ></iframe>
+      </div>
+
+      <span class="section-heading" style="display: block; margin-bottom: 8px;">Ülesanne</span>
+      <div id="exercise-box" class="student-exercise empty">
+        Oota — õpetaja postitab ülesande
+      </div>
+
+      <span class="section-heading" style="display: block; margin-bottom: 12px;">Sinu vastus</span>
+      <div class="student-buttons">
+        <button data-answer="yes" disabled>
+          <span>Sain aru</span>
+          <span class="num">01</span>
+        </button>
+        <button data-answer="unsure" disabled>
+          <span>Pole kindel</span>
+          <span class="num">02</span>
+        </button>
+        <button data-answer="no" disabled>
+          <span>Ei saanud aru</span>
+          <span class="num">03</span>
+        </button>
+      </div>
+
+      <div class="student-status" id="status-line"></div>
+    </div>
+
+    <!-- Libs -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="shared.js"></script>
+    <script src="student.js"></script>
+  </body>
+</html>

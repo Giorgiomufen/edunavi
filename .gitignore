@@ -1,0 +1,10 @@
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
+node_modules/
+
+# Comment out the next line if you want to commit your Supabase keys.
+# (The anon key is safe to expose, but most people prefer to keep it local.)
+# config.js
