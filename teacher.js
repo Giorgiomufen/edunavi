@@ -308,6 +308,7 @@
 
     $("start-screen").style.display = "none";
     $("app").style.display = "flex";
+    $("top-auth").style.display = "none";
 
     $("room-code").textContent = code;
     const joinUrl = EduNavi.studentJoinUrl(code);
@@ -402,6 +403,7 @@
     };
     $("app").style.display = "none";
     $("start-screen").style.display = "grid";
+    $("top-auth").style.display = "flex";
   }
 
   function endLesson() {
