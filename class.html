@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="et">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EduNavi — klassi otsustugi</title>
+    <meta name="description" content="EduNavi — õpetaja näeb 1 minutiga, kes vajab tuge, kes on ebakindel ja kes on valmis edasi liikuma." />
+    <meta name="theme-color" content="#000000" />
+    <link rel="canonical" href="https://edunavi.vercel.app/class" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="EduNavi — klassi otsustugi" />
+    <meta property="og:description" content="Üks vaade. Kolm gruppi. Selge soovitus. Üks minut." />
+    <meta property="og:image" content="https://edunavi.vercel.app/og.svg" />
+    <meta property="og:locale" content="et_EE" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Ctext x='50%25' y='62%25' font-family='Arial' font-size='18' font-weight='700' fill='white' text-anchor='middle'%3EE%3C/text%3E%3C/svg%3E" />
+  </head>
+  <body class="class-body">
+    <header class="class-header">
+      <a href="/" class="wordmark" style="border:0; color:var(--text);">EduNavi <small>Klass</small></a>
+      <div class="class-meta-bar">
+        <span id="meta-class" class="mono"></span>
+        <span id="meta-topic" class="mono"></span>
+        <span id="meta-students" class="mono"></span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button id="reload-btn" class="ghost-button" title="Lae uus näidisandmestik">Uus näidis</button>
+        <a href="/tugi" class="ghost-button" style="text-decoration:none; padding:10px 18px;">Tugiõpetaja vaade</a>
+      </div>
+    </header>
+
+    <main class="class-main">
+      <!-- Recommendation card — what the teacher actually does next -->
+      <section class="recommendation">
+        <span class="eyebrow">Järgmine parim samm</span>
+        <h1 id="rec-headline" class="rec-headline">Laadin…</h1>
+        <p id="rec-detail" class="rec-detail"></p>
+        <div id="rec-actions" class="rec-actions"></div>
+      </section>
+
+      <!-- Three traffic-light buckets -->
+      <section class="buckets">
+        <div class="bucket bucket-need" id="bucket-need">
+          <div class="bucket-head">
+            <span class="bucket-dot"></span>
+            <span class="bucket-label">Vajab tuge</span>
+            <span class="bucket-count" id="count-need">0</span>
+          </div>
+          <ul class="bucket-list" id="list-need"></ul>
+        </div>
+        <div class="bucket bucket-mid" id="bucket-mid">
+          <div class="bucket-head">
+            <span class="bucket-dot"></span>
+            <span class="bucket-label">Ebakindel</span>
+            <span class="bucket-count" id="count-mid">0</span>
+          </div>
+          <ul class="bucket-list" id="list-mid"></ul>
+        </div>
+        <div class="bucket bucket-ready" id="bucket-ready">
+          <div class="bucket-head">
+            <span class="bucket-dot"></span>
+            <span class="bucket-label">Valmis edasi liikuma</span>
+            <span class="bucket-count" id="count-ready">0</span>
+          </div>
+          <ul class="bucket-list" id="list-ready"></ul>
+        </div>
+      </section>
+
+      <!-- Per-student × per-exercise grid -->
+      <section class="grid-section">
+        <div class="grid-section-head">
+          <span class="eyebrow">Iga õpilane × iga ülesanne</span>
+          <span class="grid-legend">
+            <span class="leg leg-correct">tehtud</span>
+            <span class="leg leg-partial">osaliselt</span>
+            <span class="leg leg-wrong">vale</span>
+            <span class="leg leg-blank">tegemata</span>
+          </span>
+        </div>
+        <div class="grid-table-wrap">
+          <table class="grid-table" id="grid-table"></table>
+        </div>
+      </section>
+
+      <!-- Hidden patterns (per the doc: spot uncertain students who got the right answer) -->
+      <section id="patterns-section" class="patterns" style="display:none;">
+        <span class="eyebrow">Märgatud mustrid</span>
+        <ul id="patterns-list" class="patterns-list"></ul>
+      </section>
+    </main>
+
+    <script src="config.js"></script>
+    <script src="class-data.js"></script>
+    <script src="class.js"></script>
+  </body>
+</html>

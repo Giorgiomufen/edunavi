@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="et">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>EduNavi — tugiõpetaja</title>
+    <meta name="description" content="EduNavi tugiõpetajale — kes vajab praegu klassis abi." />
+    <meta name="theme-color" content="#000000" />
+    <link rel="canonical" href="https://edunavi.vercel.app/tugi" />
+    <meta name="robots" content="noindex" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Ctext x='50%25' y='62%25' font-family='Arial' font-size='18' font-weight='700' fill='white' text-anchor='middle'%3EE%3C/text%3E%3C/svg%3E" />
+    <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%23000'/%3E%3Ctext x='50%25' y='62%25' font-family='Arial' font-size='100' font-weight='700' fill='white' text-anchor='middle'%3EE%3C/text%3E%3C/svg%3E" />
+  </head>
+  <body class="tugi-body">
+    <header class="tugi-header">
+      <a href="/" class="wordmark" style="border:0; color:var(--text); font-size:14px;">EduNavi <small>Tugiõpetaja</small></a>
+      <span id="tugi-meta" class="mono" style="font-size:10px; color:var(--muted);"></span>
+    </header>
+
+    <main class="tugi-main">
+      <section class="tugi-action">
+        <span class="eyebrow">Sinu praegune ülesanne</span>
+        <h1 id="tugi-headline">Laadin…</h1>
+        <p id="tugi-detail" class="muted-text"></p>
+      </section>
+
+      <section class="tugi-block">
+        <div class="tugi-block-head">
+          <span class="bucket-dot" style="background: rgb(231, 76, 60); box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.2);"></span>
+          <span class="tugi-block-label">Mine nende juurde</span>
+          <span class="tugi-block-count" id="tugi-need-count">0</span>
+        </div>
+        <ol id="tugi-need-list" class="tugi-name-list"></ol>
+      </section>
+
+      <section class="tugi-block">
+        <div class="tugi-block-head">
+          <span class="bucket-dot" style="background: rgb(241, 196, 15); box-shadow: 0 0 0 4px rgba(241, 196, 15, 0.2);"></span>
+          <span class="tugi-block-label">Jälgi neid pisut</span>
+          <span class="tugi-block-count" id="tugi-mid-count">0</span>
+        </div>
+        <ol id="tugi-mid-list" class="tugi-name-list small"></ol>
+      </section>
+
+      <p class="tugi-foot">
+        Värskendan iga 5 sekundi tagant juhtõpetaja vaatest.
+        <a href="/class" style="display:block; margin-top:8px;">Vaata täielikku klassi vaadet →</a>
+      </p>
+    </main>
+
+    <script src="class-data.js"></script>
+    <script src="tugi.js"></script>
+  </body>
+</html>
