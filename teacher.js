@@ -126,12 +126,20 @@
     }
   }
 
-  function trafficLightColor(yesPct, alpha) {
-    // green if most got it, yellow mid, red if many stuck
+  // Blend three category colors by their proportions so an "unsure-heavy"
+  // step is visually distinct from a "no-heavy" step.
+  // 100% yes  → green   (46, 204, 113)
+  // 100% unsure → amber (241, 196, 15)
+  // 100% no   → red    (231, 76, 60)
+  function blendCategoryColor(yes, unsure, no, alpha) {
+    const total = yes + unsure + no;
     const a = alpha === undefined ? 0.85 : alpha;
-    if (yesPct >= 0.7) return `rgba(46, 204, 113, ${a})`;     // green
-    if (yesPct >= 0.4) return `rgba(241, 196, 15, ${a})`;     // yellow
-    return `rgba(231, 76, 60, ${a})`;                          // red
+    if (total === 0) return "rgba(255,255,255,0.08)";
+    const yp = yes / total, up = unsure / total, np = no / total;
+    const r = Math.round(46 * yp + 241 * up + 231 * np);
+    const g = Math.round(204 * yp + 196 * up + 76 * np);
+    const b = Math.round(113 * yp + 15 * up + 60 * np);
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
   }
 
   function initPolarChart() {
@@ -195,10 +203,10 @@
       const total = c.yes + c.unsure + c.no;
       const yesPct = total === 0 ? 0 : c.yes / total;
       // bar height: % "got it" + a small visible base so empty steps still show
-      const value = total === 0 ? 8 : Math.max(8, Math.round(yesPct * 100));
+      const value = total === 0 ? 8 : Math.max(12, Math.round(yesPct * 100));
       labels.push(`Etapp ${i + 1}`);
       data.push(value);
-      colors.push(total === 0 ? "rgba(255,255,255,0.08)" : trafficLightColor(yesPct, 0.78));
+      colors.push(blendCategoryColor(c.yes, c.unsure, c.no, 0.82));
     });
     state.polarChart.data.labels = labels;
     state.polarChart.data.datasets[0].data = data;
