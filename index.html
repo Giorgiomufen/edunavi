@@ -10,31 +10,51 @@
   <body>
     <div class="banner" id="config-banner"></div>
 
+    <!-- Top-right auth corner (visible on start screen) -->
+    <div id="top-auth" class="top-auth">
+      <span id="top-auth-loading" style="color:var(--muted-2); font-size:11px; letter-spacing:0.25em; text-transform:uppercase;">kontroll</span>
+      <button id="open-signin" class="link-button" style="display:none;">Logi sisse</button>
+      <span id="top-auth-user" style="display:none; align-items:center; gap:14px;">
+        <span id="user-email" class="mono" style="font-size:12px; color:var(--muted);"></span>
+        <button id="signout-btn" style="font-size:10px; padding:6px 12px;">Logi välja</button>
+      </span>
+    </div>
+
     <!-- Start screen -->
     <div id="start-screen" class="start-screen">
       <div class="start-card">
         <h1 class="display">EduNavi</h1>
         <p>Õpetaja otsustugi reaalajas.</p>
-        <div id="auth-area">
-          <form id="signed-out" style="display:none; text-align:left;" autocomplete="on">
-            <span class="eyebrow" style="display:block; margin-bottom:14px;">Logi sisse</span>
-            <input type="email" id="email-input" placeholder="email@kool.ee" autocomplete="email" required style="font-size:15px;" />
-            <input type="password" id="password-input" placeholder="parool" autocomplete="current-password" required style="font-size:15px; margin-top:14px;" />
-            <div id="auth-error" style="margin-top:10px; min-height:18px; color:var(--warn); font-size:12px; letter-spacing:0.05em;"></div>
-            <div style="display:flex; gap:10px; margin-top:18px;">
-              <button type="submit" class="primary" id="signin-btn" style="flex:1;">Logi sisse</button>
-              <button type="button" id="signup-btn" style="flex:1;">Loo konto</button>
-            </div>
-          </form>
-          <div id="signed-in" style="display:none;">
-            <p style="margin-bottom:8px; color:var(--muted); font-size:13px;">Sisse logitud</p>
-            <p id="user-email" style="margin-top:0; margin-bottom:24px; font-family:'JetBrains Mono', monospace; font-size:13px;"></p>
-            <button class="primary start-button" id="start-btn">Alusta tundi</button>
-            <p style="margin-top:18px;"><button id="signout-btn" style="font-size:11px; padding:8px 16px;">Logi välja</button></p>
-          </div>
-          <div id="auth-loading" style="color:var(--muted); font-size:12px; letter-spacing:0.2em; text-transform:uppercase;">kontrollin sessiooni</div>
-        </div>
+        <button class="primary start-button" id="start-btn">Alusta tundi</button>
+        <p style="margin-top:24px; font-size:12px; color:var(--muted-2); letter-spacing:0.1em;">
+          Anonüümselt töötab kohe. Tundide salvestamiseks saad luua konto paremal üleval.
+        </p>
       </div>
+    </div>
+
+    <!-- Login modal -->
+    <div id="auth-modal" class="modal-overlay">
+      <form class="modal-content auth-card" id="auth-form" autocomplete="on">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <h2 class="display" style="font-size:24px; margin:0;" id="auth-mode-title">Logi sisse</h2>
+          <button type="button" id="auth-close" style="padding:6px 10px; font-size:11px;">×</button>
+        </div>
+        <p class="auth-tagline" id="auth-mode-sub">Tunnid salvestuvad sinu kontole.</p>
+        <div class="form-field">
+          <label class="form-label" for="email-input">Email</label>
+          <input type="email" id="email-input" placeholder="email@kool.ee" autocomplete="email" required />
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="password-input">Parool</label>
+          <input type="password" id="password-input" placeholder="vähemalt 6 tähemärki" autocomplete="current-password" required />
+        </div>
+        <div class="auth-error" id="auth-error"></div>
+        <button type="submit" class="primary signin-button" id="auth-submit">Logi sisse</button>
+        <p class="form-toggle">
+          <span id="auth-toggle-text">Pole kontot?</span>
+          <button type="button" id="auth-toggle" class="link-button">Loo konto</button>
+        </p>
+      </form>
     </div>
 
     <!-- App -->

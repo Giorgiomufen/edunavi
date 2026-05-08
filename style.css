@@ -164,6 +164,111 @@ textarea { resize: none; line-height: 1.4; }
   box-shadow: 0 0 0 4px rgba(0, 255, 136, 0.15);
 }
 
+/* === Top-right auth corner === */
+.top-auth {
+  position: fixed;
+  top: 18px;
+  right: 24px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* === Modal === */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(6px);
+  display: none;
+  place-items: center;
+  z-index: 200;
+  padding: 24px;
+}
+.modal-overlay.show { display: grid; }
+.modal-content {
+  max-width: 420px;
+  width: 100%;
+  padding: 32px;
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+}
+
+/* === Auth form === */
+.form-label {
+  display: block;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.form-field { margin-bottom: 18px; }
+.form-field input[type="email"],
+.form-field input[type="password"],
+.form-field input[type="text"] {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 14px 16px;
+  font-size: 15px;
+}
+.form-field input:focus {
+  border-color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+}
+.signin-button {
+  width: 100%;
+  padding: 16px;
+  font-size: 13px;
+  letter-spacing: 0.3em;
+}
+.form-toggle {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+.link-button {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--text);
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--line-strong);
+}
+.link-button:hover {
+  background: transparent;
+  color: var(--text);
+  border: 0;
+  text-decoration-color: var(--text);
+}
+.auth-error {
+  min-height: 20px;
+  margin-bottom: 8px;
+  color: #ff8a73;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+}
+.auth-card { text-align: left; max-width: 380px; }
+.auth-card .display { font-size: 56px; text-align: center; margin-bottom: 8px; }
+.auth-card .auth-tagline {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  margin: 0 0 36px;
+}
+
 /* === Start screen === */
 .start-screen {
   flex: 1;

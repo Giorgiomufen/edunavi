@@ -15,18 +15,40 @@
   };
 
   function renderAuthUi() {
-    const out = $("signed-out");
-    const inE = $("signed-in");
-    const loading = $("auth-loading");
+    const loading = $("top-auth-loading");
+    const open = $("open-signin");
+    const userArea = $("top-auth-user");
     if (loading) loading.style.display = "none";
     if (state.user) {
-      out.style.display = "none";
-      inE.style.display = "block";
+      open.style.display = "none";
+      userArea.style.display = "inline-flex";
       $("user-email").textContent = state.user.email || state.user.id;
     } else {
-      out.style.display = "block";
-      inE.style.display = "none";
+      open.style.display = "inline-flex";
+      userArea.style.display = "none";
     }
+  }
+
+  let authMode = "signin";
+  function applyAuthMode() {
+    const isSignin = authMode === "signin";
+    $("auth-mode-title").textContent = isSignin ? "Logi sisse" : "Loo konto";
+    $("auth-mode-sub").textContent = isSignin
+      ? "Tunnid salvestuvad sinu kontole."
+      : "Tasuta konto. Vajame ainult emaili sinu tundide salvestamiseks.";
+    $("auth-submit").textContent = isSignin ? "Logi sisse" : "Loo konto";
+    $("auth-toggle-text").textContent = isSignin ? "Pole kontot?" : "On juba konto?";
+    $("auth-toggle").textContent = isSignin ? "Loo konto" : "Logi sisse";
+  }
+  function openAuthModal() {
+    authMode = "signin";
+    applyAuthMode();
+    $("auth-error").textContent = "";
+    $("auth-modal").classList.add("show");
+    setTimeout(() => { try { $("email-input").focus(); } catch (e) {} }, 60);
+  }
+  function closeAuthModal() {
+    $("auth-modal").classList.remove("show");
   }
 
   function updateStats() {
@@ -338,32 +360,35 @@
     $("end-btn").addEventListener("click", endLesson);
     $("mic-btn").addEventListener("click", toggleAudio);
     $("cam-btn").addEventListener("click", toggleVideo);
-    function showAuthError(msg) {
-      const el = $("auth-error");
-      if (el) el.textContent = msg || "";
-    }
-    function readForm() {
-      return {
-        email: $("email-input").value.trim(),
-        password: $("password-input").value,
-      };
-    }
-    $("signed-out").addEventListener("submit", async (e) => {
+    function showAuthError(msg) { $("auth-error").textContent = msg || ""; }
+    $("open-signin").addEventListener("click", openAuthModal);
+    $("auth-close").addEventListener("click", closeAuthModal);
+    $("auth-modal").addEventListener("click", (e) => {
+      if (e.target.id === "auth-modal") closeAuthModal();
+    });
+    $("auth-toggle").addEventListener("click", () => {
+      authMode = authMode === "signin" ? "signup" : "signin";
+      applyAuthMode();
+      showAuthError("");
+    });
+    $("auth-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       showAuthError("");
-      const { email, password } = readForm();
+      const email = $("email-input").value.trim();
+      const password = $("password-input").value;
       if (!email || !password) return showAuthError("Sisesta email ja parool.");
-      const { error } = await EduNaviAuth.signInWithEmail(email, password);
-      if (error) showAuthError(error);
-    });
-    $("signup-btn").addEventListener("click", async () => {
-      showAuthError("");
-      const { email, password } = readForm();
-      if (!email || !password) return showAuthError("Sisesta email ja parool.");
-      if (password.length < 6) return showAuthError("Parool peab olema vähemalt 6 tähemärki.");
-      const { error } = await EduNaviAuth.signUpWithEmail(email, password);
-      if (error) showAuthError(error);
-      else showAuthError("Konto loodud — kontrolli oma postkasti kinnitamiseks (kui see on Supabase'is sisse lülitatud).");
+      if (authMode === "signup" && password.length < 6) {
+        return showAuthError("Parool peab olema vähemalt 6 tähemärki.");
+      }
+      const fn = authMode === "signin"
+        ? EduNaviAuth.signInWithEmail
+        : EduNaviAuth.signUpWithEmail;
+      const { error } = await fn(email, password);
+      if (error) {
+        showAuthError(error);
+      } else if (authMode === "signup") {
+        showAuthError("Konto loodud. Kui email kinnitamine on sisse, kontrolli postkasti.");
+      }
     });
     $("signout-btn").addEventListener("click", async () => {
       await EduNaviAuth.signOut();
@@ -380,8 +405,11 @@
       state.user = await EduNaviAuth.getUser();
       renderAuthUi();
       EduNaviAuth.onAuthChange((user) => {
+        const wasSignedIn = !!state.user;
         state.user = user;
         renderAuthUi();
+        // If we just acquired a user (sign-in or auto-confirm signup), close the modal.
+        if (user && !wasSignedIn) closeAuthModal();
       });
     } else {
       // Without Supabase, allow anonymous "demo" use so the layout is still testable.
