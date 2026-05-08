@@ -326,6 +326,172 @@
     if (state.channel) state.channel.sendReset({ exerciseId: state.currentExerciseId });
   }
 
+  // ====== Rule-based "AI" step proposal ======
+  // For demo: pattern-matches common math problem shapes to plausible steps.
+  // Phase 2 plugs in a real LLM via /api/propose endpoint.
+  function proposeStepsFor(text) {
+    const t = (text || "").toLowerCase().replace(/\s+/g, " ").trim();
+
+    // Linear equation: ax + b = c  or  ax - b = c
+    const lin = t.match(/(\d+)\s*x\s*([+\-−])\s*(\d+)\s*=\s*(-?\d+)/);
+    if (lin) {
+      const a = lin[1], op = lin[2], b = lin[3], c = lin[4];
+      const inverseOp = (op === "+" ? "Lahuta" : "Lisa");
+      return [
+        `${inverseOp} ${b} mõlemale poolele võrrandist`,
+        `Jaga mõlemad pooled ${a}-ga`,
+        `Saadud x väärtus — kontrolli see algvõrrandis`,
+      ];
+    }
+
+    // Quadratic: x² + bx + c  =  0  (or any x² appearance with =)
+    if (/x\s*\^?\s*2|x²/.test(t) && t.includes("=")) {
+      return [
+        "Vii kõik liikmed ühele poolele, et oleks 0",
+        "Tegurda või kasuta diskriminandi valemit b² − 4ac",
+        "Leia x väärtused valemiga (−b ± √D) / 2a",
+        "Kontrolli mõlemad lahendid algvõrrandis",
+      ];
+    }
+
+    // Function analysis: f(x) = …
+    if (/f\s*\(\s*x\s*\)/.test(t) || /funktsioon/.test(t) || /tuletis/.test(t)) {
+      return [
+        "Funktsiooni nullkohtade leidmine",
+        "Tuletise leidmine",
+        "Märgitabeli koostamine",
+        "Kasvamis- ja kahanemisvahemike määramine",
+        "Ekstreemumite leidmine",
+      ];
+    }
+
+    // Fractions
+    if (/\d+\/\d+|murru|murd/.test(t)) {
+      return [
+        "Leia ühine nimetaja",
+        "Teisenda kõik murrud ühise nimetajaga",
+        "Liida või lahuta lugejad, nimetaja jääb sama",
+        "Lihtsusta vastust kui võimalik",
+      ];
+    }
+
+    // System of equations
+    if (t.split("=").length > 2 || /süsteem/.test(t)) {
+      return [
+        "Avalda üks muutuja teise kaudu ühest võrrandist",
+        "Asenda see avaldis teise võrrandisse",
+        "Lahenda saadud üks-muutujaline võrrand",
+        "Leia ka teine muutuja, kontrolli mõlemas algvõrrandis",
+      ];
+    }
+
+    // Default: generic 4-step problem-solving structure
+    return [
+      "Eralda olulised andmed ülesandest",
+      "Vali sobiv meetod või valem",
+      "Tee arvutused samm-sammult",
+      "Kontrolli vastust algse ülesandega",
+    ];
+  }
+
+  function renderStepsList(steps) {
+    const list = $("steps-list");
+    list.innerHTML = "";
+    steps.forEach((stepText, i) => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <span class="num">${String(i + 1).padStart(2, "0")}</span>
+        <input type="text" value="${stepText.replace(/"/g, "&quot;")}" />
+        <button class="remove" type="button" title="Eemalda see etapp">×</button>
+      `;
+      li.querySelector(".remove").addEventListener("click", () => {
+        li.remove();
+        renumberSteps();
+      });
+      list.appendChild(li);
+    });
+  }
+  function renumberSteps() {
+    const list = $("steps-list");
+    Array.from(list.children).forEach((li, i) => {
+      li.querySelector(".num").textContent = String(i + 1).padStart(2, "0");
+    });
+  }
+  function readSteps() {
+    return Array.from($("steps-list").querySelectorAll("input"))
+      .map((i) => i.value.trim())
+      .filter(Boolean);
+  }
+  function showStepsReview(steps) {
+    renderStepsList(steps);
+    $("steps-review").style.display = "flex";
+    $("steps-review").classList.add("show");
+    document.querySelector(".lesson-input-bar").style.display = "none";
+  }
+  function hideStepsReview() {
+    $("steps-review").style.display = "none";
+    $("steps-review").classList.remove("show");
+    document.querySelector(".lesson-input-bar").style.display = "";
+  }
+  function proposeSteps() {
+    const text = $("exercise-input").value.trim();
+    if (!text) {
+      $("exercise-input").focus();
+      return;
+    }
+    const steps = proposeStepsFor(text);
+    showStepsReview(steps);
+  }
+  function addStepRow() {
+    const list = $("steps-list");
+    const i = list.children.length;
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <span class="num">${String(i + 1).padStart(2, "0")}</span>
+      <input type="text" value="" placeholder="Sisesta etapi kirjeldus" />
+      <button class="remove" type="button" title="Eemalda see etapp">×</button>
+    `;
+    li.querySelector(".remove").addEventListener("click", () => {
+      li.remove();
+      renumberSteps();
+    });
+    list.appendChild(li);
+    li.querySelector("input").focus();
+  }
+  async function postConfirmedSteps() {
+    const steps = readSteps();
+    if (steps.length === 0) return;
+    hideStepsReview();
+    $("exercise-input").value = "";
+    await postStepsList(steps);
+  }
+
+  async function postStepsList(lines) {
+    const post = $("post-btn");
+    const propose = $("propose-btn");
+    post.disabled = true; propose.disabled = true;
+    for (let i = 0; i < lines.length; i++) {
+      const text = `${i + 1}. samm — ${lines[i]}`;
+      const exercise = { id: EduNavi.newExerciseId(), text, ts: Date.now() };
+      state.currentExerciseId = exercise.id;
+      state.stats.exercises++;
+      state.respondedSessions = new Set();
+      setCurrentExercise(text);
+      resetCounts();
+      updateStats();
+      updateResponseRate();
+      if (state.channel) {
+        state.channel.sendExercise(exercise);
+        state.channel.updatePresence({ currentExercise: exercise });
+      }
+      if (state.lessonId) {
+        EduNaviDB.logExercise({ lessonId: state.lessonId, id: exercise.id, text });
+      }
+      if (i < lines.length - 1) await new Promise((r) => setTimeout(r, 4000));
+    }
+    post.disabled = false; propose.disabled = false;
+  }
+
   // Post each newline as a separate exercise, with a delay between them.
   // Lets the teacher decompose a problem into steps without needing AI.
   async function postSteps() {
@@ -500,7 +666,10 @@
     if (!EduNavi.isConfigured) EduNavi.showConfigBanner();
     $("start-btn").addEventListener("click", startLesson);
     $("post-btn").addEventListener("click", postExercise);
-    $("post-steps-btn").addEventListener("click", postSteps);
+    $("propose-btn").addEventListener("click", proposeSteps);
+    $("steps-cancel").addEventListener("click", hideStepsReview);
+    $("steps-add").addEventListener("click", addStepRow);
+    $("steps-post-all").addEventListener("click", postConfirmedSteps);
     $("reset-btn").addEventListener("click", manualReset);
     $("end-btn").addEventListener("click", endLesson);
     $("mic-btn").addEventListener("click", toggleAudio);

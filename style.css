@@ -815,6 +815,68 @@ body.history-body {
   align-items: stretch;
   background: var(--bg);
 }
+
+.steps-review {
+  grid-column: 1;
+  grid-row: 2;
+  border-top: 1px solid var(--line);
+  padding: 18px 22px;
+  background: var(--bg-2);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+.steps-review.show + .lesson-input-bar { display: none; }
+.steps-review-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.steps-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.steps-list li {
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+.steps-list .num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+.steps-list input {
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.03);
+  padding: 10px 14px;
+  font-size: 14px;
+}
+.steps-list input:focus { border-color: var(--text); }
+.steps-list .remove {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.steps-list .remove:hover { background: var(--warn); border-color: var(--warn); color: #fff; }
+.steps-review-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 6px;
+  border-top: 1px solid var(--line);
+}
 .lesson-input-bar textarea { flex: 1 1 240px; min-width: 0; }
 .lesson-input-bar button { flex: 0 0 auto; }
 .lesson-input-bar textarea {

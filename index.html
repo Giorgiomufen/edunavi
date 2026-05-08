@@ -183,14 +183,26 @@
           </div>
         </aside>
 
+        <div id="steps-review" class="steps-review" style="display:none;">
+          <div class="steps-review-head">
+            <span class="eyebrow" style="color:var(--text);">AI pakutud etapid · vaata üle ja kinnita</span>
+            <button id="steps-cancel" class="link-button">Tühista</button>
+          </div>
+          <ol id="steps-list" class="steps-list"></ol>
+          <div class="steps-review-actions">
+            <button id="steps-add" class="link-button">+ Lisa etapp</button>
+            <button class="primary" id="steps-post-all">Postita kõik järjest (4s vahega)</button>
+          </div>
+        </div>
+
         <div class="lesson-input-bar">
           <textarea
             id="exercise-input"
-            placeholder="Sisesta ülesanne — või mitu sammu, üks rida = üks samm"
+            placeholder="Sisesta üks ülesanne — näiteks: Lahenda 7x − 5 = 16"
             rows="1"
           ></textarea>
           <button class="primary" id="post-btn" title="Postita üks ülesanne (Cmd/Ctrl+Enter)">Postita</button>
-          <button id="post-steps-btn" title="Iga rida postitab eraldi sammuna 4 sek vahega">Sammudena</button>
+          <button id="propose-btn" title="AI pakub etapid sinu kinnitamiseks">Pakku etappe</button>
           <button id="reset-btn" title="Tühjenda vastuste loendurid">Lähtesta</button>
         </div>
       </main>
