@@ -52,19 +52,14 @@ alter table public.exercises       enable row level security;
 alter table public.responses       enable row level security;
 alter table public.presence_events enable row level security;
 
--- LESSONS: anyone can insert (anonymous teacher in v1; will tighten when Google SSO lands).
--- Once Google SSO is wired, replace with `auth.uid() = teacher_id`.
+-- LESSONS: anyone can do CRUD in v1 (anonymous teacher).
+-- When auth lands in Phase 2, tighten to `auth.uid() = teacher_id`.
 drop policy if exists lessons_insert_any on public.lessons;
-create policy lessons_insert_any on public.lessons
-  for insert with check (true);
-
 drop policy if exists lessons_select_any on public.lessons;
-create policy lessons_select_any on public.lessons
-  for select using (true);
-
 drop policy if exists lessons_update_any on public.lessons;
-create policy lessons_update_any on public.lessons
-  for update using (true) with check (true);
+drop policy if exists lessons_all       on public.lessons;
+create policy lessons_all on public.lessons
+  for all using (true) with check (true);
 
 -- EXERCISES: anyone can insert / select (will scope to lesson owner in Phase 2)
 drop policy if exists exercises_all on public.exercises;
