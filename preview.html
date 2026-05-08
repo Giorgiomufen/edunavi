@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="et">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EduNavi — Phase 2 eelvaade</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Ctext x='50%25' y='62%25' font-family='Arial' font-size='18' font-weight='700' fill='white' text-anchor='middle'%3EE%3C/text%3E%3C/svg%3E" />
+    <style>
+      body.preview-body { height: auto; overflow-y: auto; }
+      .preview-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 28px;
+        border-bottom: 1px solid var(--line);
+      }
+      .preview-badge {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+        padding: 6px 12px;
+        border: 1px solid var(--warn);
+        color: var(--warn);
+      }
+      .preview-main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 36px 24px 80px;
+      }
+      .preview-problem {
+        border: 1px solid var(--line);
+        padding: 28px 32px;
+        margin-bottom: 36px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 24px;
+        align-items: center;
+      }
+      .preview-problem .label {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 11px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+      .preview-problem .text {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-weight: 500;
+        font-size: 36px;
+        line-height: 1.2;
+      }
+      .preview-problem .meta {
+        text-align: right;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .preview-problem .meta strong {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-weight: 700;
+        font-size: 36px;
+        letter-spacing: 0.04em;
+        color: var(--text);
+        display: block;
+        line-height: 1;
+        margin-bottom: 4px;
+      }
+
+      .preview-section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 18px;
+      }
+      .preview-section-head h2 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 11px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--muted);
+        font-weight: 500;
+        margin: 0;
+      }
+      .preview-section-head h2::before { content: '— '; }
+      .preview-section-head .legend {
+        display: flex;
+        gap: 18px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 0.05em;
+      }
+      .preview-section-head .legend .swatch {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        margin-right: 6px;
+        vertical-align: middle;
+      }
+
+      .preview-steps {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 48px;
+      }
+      .preview-step {
+        display: grid;
+        grid-template-columns: 64px 1fr 280px;
+        gap: 24px;
+        border: 1px solid var(--line);
+        padding: 22px 24px;
+        align-items: center;
+      }
+      .preview-step .num {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 28px;
+        color: var(--muted);
+        font-weight: 500;
+        letter-spacing: 0.02em;
+      }
+      .preview-step .body .name {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-weight: 700;
+        font-size: 22px;
+        line-height: 1.2;
+        margin-bottom: 4px;
+      }
+      .preview-step .body .desc {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      .preview-bar {
+        display: flex;
+        height: 10px;
+        background: var(--line);
+        margin-bottom: 10px;
+        overflow: hidden;
+      }
+      .preview-bar .seg { height: 100%; }
+      .preview-bar .seg.yes { background: #ffffff; }
+      .preview-bar .seg.maybe { background: #888888; }
+      .preview-bar .seg.no { background: #3d3d3d; }
+      .preview-bar-meta {
+        display: flex;
+        justify-content: space-between;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 0.05em;
+      }
+      .preview-step.hot { border-color: var(--warn); }
+      .preview-step.hot .num { color: var(--warn); }
+
+      .preview-callout {
+        background: rgba(255, 85, 56, 0.08);
+        border: 1px solid var(--warn);
+        padding: 22px 24px;
+        margin-bottom: 36px;
+      }
+      .preview-callout .label {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 11px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--warn);
+        margin-bottom: 8px;
+      }
+      .preview-callout .recommendation {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 22px;
+        line-height: 1.3;
+        font-weight: 500;
+      }
+
+      .preview-modes {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        border: 1px solid var(--line);
+        margin-bottom: 36px;
+      }
+      .preview-mode {
+        padding: 20px 22px;
+        border-right: 1px solid var(--line);
+      }
+      .preview-mode:last-child { border-right: 0; }
+      .preview-mode.active { background: rgba(255, 255, 255, 0.04); }
+      .preview-mode .label {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 10px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+      .preview-mode .name {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-weight: 700;
+        font-size: 18px;
+        margin-bottom: 4px;
+      }
+      .preview-mode.active .name { color: var(--text); }
+      .preview-mode:not(.active) .name { color: var(--muted); }
+      .preview-mode .desc {
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      .preview-mode .check {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        color: var(--live);
+        margin-top: 6px;
+      }
+      .preview-mode:not(.active) .check { display: none; }
+
+      @media (max-width: 800px) {
+        .preview-step { grid-template-columns: 1fr; gap: 12px; }
+        .preview-step .num { font-size: 22px; }
+        .preview-modes { grid-template-columns: 1fr; }
+        .preview-mode { border-right: 0; border-bottom: 1px solid var(--line); }
+        .preview-mode:last-child { border-bottom: 0; }
+      }
+    </style>
+  </head>
+  <body class="preview-body">
+    <header class="preview-header">
+      <a href="index.html" class="wordmark" style="border:0; color:var(--text);">EduNavi <small>Phase 2 eelvaade</small></a>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <span class="preview-badge">Tuleviku vaade</span>
+        <a href="index.html" style="font-size:11px; padding:8px 14px; border:1px solid var(--line-strong); text-decoration:none; color:var(--text); font-family:'Barlow Condensed',sans-serif; font-weight:600; letter-spacing:0.22em; text-transform:uppercase;">Tagasi</a>
+      </div>
+    </header>
+
+    <main class="preview-main">
+
+      <div class="preview-problem">
+        <div>
+          <div class="label">Õpetaja sisestatud ülesanne</div>
+          <div class="text">Funktsiooni f(x) = x² − 6x + 8 uurimine intervallimeetodiga</div>
+        </div>
+        <div class="meta">
+          <strong>32</strong>
+          <span style="letter-spacing: 0.2em; text-transform: uppercase;">vastanut / 47 liitunut</span>
+        </div>
+      </div>
+
+      <div class="preview-section-head">
+        <h2>Etappide kuvamise režiim</h2>
+        <span class="legend"><span style="color:var(--muted);">õpetaja valib ülesande kaupa</span></span>
+      </div>
+      <div class="preview-modes">
+        <div class="preview-mode active">
+          <div class="label">Aktiivne</div>
+          <div class="name">Täisrežiim</div>
+          <div class="desc">Õpilane näeb kõiki etappe ette.</div>
+          <div class="check">● valitud selle ülesande jaoks</div>
+        </div>
+        <div class="preview-mode">
+          <div class="label">Saadaval</div>
+          <div class="name">Teema-režiim</div>
+          <div class="desc">Õpilane näeb ainult teemasid, mitte täpset lahenduskäiku.</div>
+          <div class="check">●</div>
+        </div>
+        <div class="preview-mode">
+          <div class="label">Saadaval</div>
+          <div class="name">Pime tagasiside</div>
+          <div class="desc">Õpilane lahendab ise, märgib pärast kus jäi kinni.</div>
+          <div class="check">●</div>
+        </div>
+      </div>
+
+      <div class="preview-section-head">
+        <h2>AI tuvastatud etapid · 5 sammu</h2>
+        <div class="legend">
+          <span><span class="swatch" style="background:#ffffff;"></span>Sain aru</span>
+          <span><span class="swatch" style="background:#888888;"></span>Pole kindel</span>
+          <span><span class="swatch" style="background:#3d3d3d;"></span>Ei saanud aru</span>
+        </div>
+      </div>
+
+      <div class="preview-steps">
+        <article class="preview-step">
+          <div class="num">01</div>
+          <div class="body">
+            <div class="name">Funktsiooni nullkohtade leidmine</div>
+            <div class="desc">Lahenda võrrand x² − 6x + 8 = 0. Diskriminant või tegurdamine.</div>
+          </div>
+          <div>
+            <div class="preview-bar">
+              <div class="seg yes" style="width: 81%;"></div>
+              <div class="seg maybe" style="width: 13%;"></div>
+              <div class="seg no" style="width: 6%;"></div>
+            </div>
+            <div class="preview-bar-meta">
+              <span>26 / 4 / 2</span>
+              <span>81% sai aru</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="preview-step">
+          <div class="num">02</div>
+          <div class="body">
+            <div class="name">Tuletise leidmine</div>
+            <div class="desc">f'(x) = 2x − 6. Märgi võrduvustingimus tuletisega = 0.</div>
+          </div>
+          <div>
+            <div class="preview-bar">
+              <div class="seg yes" style="width: 72%;"></div>
+              <div class="seg maybe" style="width: 19%;"></div>
+              <div class="seg no" style="width: 9%;"></div>
+            </div>
+            <div class="preview-bar-meta">
+              <span>23 / 6 / 3</span>
+              <span>72% sai aru</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="preview-step hot">
+          <div class="num">03</div>
+          <div class="body">
+            <div class="name">Märgitabeli koostamine</div>
+            <div class="desc">Märgitabel intervallidel — kus f' positiivne, kus negatiivne.</div>
+          </div>
+          <div>
+            <div class="preview-bar">
+              <div class="seg yes" style="width: 25%;"></div>
+              <div class="seg maybe" style="width: 22%;"></div>
+              <div class="seg no" style="width: 53%;"></div>
+            </div>
+            <div class="preview-bar-meta">
+              <span>8 / 7 / 17</span>
+              <span style="color: var(--warn);">53% jäi kinni</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="preview-step">
+          <div class="num">04</div>
+          <div class="body">
+            <div class="name">Kasvamis- ja kahanemisvahemike määramine</div>
+            <div class="desc">Märgitabeli põhjal kus f kasvab, kus kahaneb.</div>
+          </div>
+          <div>
+            <div class="preview-bar">
+              <div class="seg yes" style="width: 41%;"></div>
+              <div class="seg maybe" style="width: 28%;"></div>
+              <div class="seg no" style="width: 31%;"></div>
+            </div>
+            <div class="preview-bar-meta">
+              <span>13 / 9 / 10</span>
+              <span>41% sai aru</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="preview-step">
+          <div class="num">05</div>
+          <div class="body">
+            <div class="name">Ekstreemumite leidmine</div>
+            <div class="desc">Tuletise märgimuutuse järgi miinimum / maksimum.</div>
+          </div>
+          <div>
+            <div class="preview-bar">
+              <div class="seg yes" style="width: 34%;"></div>
+              <div class="seg maybe" style="width: 25%;"></div>
+              <div class="seg no" style="width: 41%;"></div>
+            </div>
+            <div class="preview-bar-meta">
+              <span>11 / 8 / 13</span>
+              <span>34% sai aru</span>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="preview-callout">
+        <div class="label">AI soovitus õpetajale</div>
+        <div class="recommendation">
+          Etapp 03 — märgitabel — on klassi peamine raskuskoht (53% kinni). Soovitus:
+          peatu, selgita märgitabeli koostamist uuesti enne ekstreemumite juurde liikumist.
+          Kohapealne abiõpetaja võiks 7 ebakindla õpilase juurde minna.
+        </div>
+      </div>
+
+      <p style="text-align:center; color:var(--muted-2); font-size:11px; letter-spacing:0.2em; text-transform:uppercase; margin-top:36px;">
+        See on Phase 2 eelvaade · andmed on näitlikud · ehitamisel
+      </p>
+    </main>
+  </body>
+</html>
