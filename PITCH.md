@@ -1,95 +1,73 @@
 # EduNavi — pitch (Estonian)
 
-> Draft for tomorrow. Edit it, don't read it. The notes are scaffolding, not a script.
+> Synced with `PITCH.docx` from the team docs folder. Edit it in your voice; don't read it. The Q&A and the demo flow are the load-bearing parts.
 
 ## 60-second main pitch
 
-**Hook — 10s.** Eesti hariduses ei ole probleem andmete puudus. Probleem on, et õpetaja ei näe õigel ajal, kus õpilased kinni jäävad. Eriti matemaatikas — ühe lahenduskäigu ajal sajad lüngad. Õpetaja ei suuda neid ükshaaval märgata.
+**Setup — 10s.** Kujuta ette õpetajat. Matemaatikatund. 24 õpilast. Tund saab läbi… ja nüüd algab päris töö. Ta avab eKooli. Vaatab tulemusi. Proovib aru saada — *kes sai aru, kes ei saanud, kas ma liigun edasi või pean tagasi minema?* Tal on selleks umbes 10 minutit. Ja see otsus määrab, kas mõni õpilane jääb maha — või saab õigel ajal abi.
 
-**Demo — 30s.** *(skaneeri QR ekraanil)* Te olete just minu õpilased. *(postita ülesanne: "Lahenda 7x − 5 = 16")* Vaadake. *(viita graafikule)* Reaalajas. See õpetaja vaade — see on EduNavi. Üks õpetaja näeb sada õpilast korraga.
+**Why now — 10s.** PISA tulemused näitavad selget langust. Õpetajate koormus kasvab, matemaatikaõpetajaid on puudu. Eestis on käivitunud *võimendatud õpetaja* mudel — üks õpetaja õpetab mitut klassi korraga. Aga me ei ole sellele õpetajale andnud tööriista, millega teha kiireid otsuseid.
 
-**Vision — 15s.** Tallinn juba katsetab võimendatud õpetaja mudelit — üks tugev aineõpetaja jõuab läbi videosillaga mitme kooli õpilasteni. Aga see mudel töötab ainult siis, kui õpetaja näeb klassipilti. EduNavi annab talle silmad. Järgmine samm: AI jagab ülesande etappideks, õpilane märgib ühe klõpsuga, kus jäi kinni — ja õpetaja näeb täpset raskuskohti.
+**Demo moment — 25s.** *(open `/class` on the projector)* See on EduNavi. Üks vaade. *(point at the headline)* Soovitus: "6 õpilast vajavad murdarvude liitmise kordust." *(point at the three buckets)* Kolm gruppi: vajab tuge, ebakindel, valmis edasi liikuma. *(scroll to the per-student grid)* Igal õpilasel on oma muster. *(click "Uus näidis")* Kui klass on tugev, soovitus muutub: "Liigu järgmise teema juurde." *(click again)* Kui klass on hädas, soovitus on "Tee kordus." Üks minut. Üks otsus. Üks õpetaja jõuab rohkemate õppijateni.
 
-**Close — 5s.** Me ei asenda õpetajat AI-ga. Me anname ühele heale õpetajale tuhande õpilase silmad.
+**Close — 5s.** EduNavi ei asenda õpetajat. Ta võimendab teda.
 
-## 30-second short version (if cut)
+## 30-second short version
 
-Eestis ei puudu hariduses andmed — puudub aeg, et õpetaja näeks reaalajas, kus õpilased kinni jäävad. *(skaneeri QR)* Te olete õpilased. *(postita ülesanne, oota vastuseid)* See graafik on klassi mõistmine reaalajas. Üks õpetaja, sada õpilast, üks pilk. AI jagab homme ülesande etappideks. EduNavi.
+Eesti õpetaja kulutab iga tunni järel 10 minutit, et eKoolist välja lugeda, kes vajab tuge. EduNavi teeb sama otsuse minutiga. *(open `/class`)* Kolm gruppi, üks soovitus, üks järgmine samm. Võimendatud õpetaja mudelis tähendab see, et üks hea õpetaja jõuab kümnete klassideni — ilma kvaliteeti kaotamata.
 
-## Demo-script (what you actually do on stage)
+## On-stage demo flow (what you actually do)
 
-1. **Open** `https://edunavi.vercel.app/` on the projector laptop.
-2. **Click** *Alusta tundi* before stepping up — so the QR is on screen when you start. (Don't fumble live.)
-3. **First sentence**: *Te olete minu õpilased. Skaneerige QR.*
-4. **Wait 5 seconds** — the counter ticks up. This silence is the demo.
-5. **Type the question**: `Lahenda 7x − 5 = 16` and post.
-6. **Narrate while it fills**: *Sain aru, pole kindel, ei saanud aru. Mina näen reaalajas, kelle juures peatuda.*
-7. **Land the line**: *Üks õpetaja näeb sada õpilast korraga.*
+1. **Open `/class` before stepping up** — `https://edunavi.vercel.app/class`. The page should already be on the projector when you walk on. No fumbling.
+2. **First sentence into the demo:** *"See on Tallinna 21. Kool, 8.A klass. 20 õpilast. Murdude põhitehted."*
+3. **Read the recommendation aloud.** Don't paraphrase — read what the screen says.
+4. **Click "Uus näidis"** in the top-right twice to cycle through the three roster scenarios. The recommendation adapts each time. This is the proof that it's not a static slide.
+5. **Pull up `/tugi` on your phone** if you want a second beat: *"See on tugiõpetaja vaade. Mobiilis. Ainult need õpilased, kelle juurde minna."*
+6. **Close with the line:** *"Üks õpetaja, sada õpilast, üks otsus, üks minut."*
 
 ## Likely judge questions + your answers
 
-**Q: Kuidas see erineb Kahoot'ist või Mentimeetri pollidest?**
-A: Kahoot kontrollib õigeid vastuseid. EduNavi ei kontrolli vastust — ta näitab, kus õpilane kinni jäi *lahenduskäigus*. AI jagab matemaatikaülesande etappideks ja õpilane märgib ühe etapi. See on pedagoogiline otsustugi, mitte viktoriin.
-
-**Q: Aga kui õpilased ei viitsi vajutada?**
-A: Tagasiside võtab ühe sekundi. Doc-i põhjal vaikimisi eeldatakse edasiliikumist — õpilane märgib ainult kohti, kus *tekkis probleem*, mitte kõiki "sain aru" kohti. See on konkreetselt selleks, et keskmised õppijad — kes ise abi ei küsi — ikkagi jätaksid jälje.
-
-**Q: Kuidas te eristate tugevaid ja nõrku õpilasi?**
-A: Esimeses prototüübis — anonüümselt, klassi tasemel. Doc ütleb sõna otseses mõttes: *"Õpetaja jaoks ei ole oluline, kes kinni jäi — vaid kus ja kui paljud."* Individuaalse profiili saab kohapealne abiõpetaja, kes oma klassi tunneb.
-
-**Q: Kas see töötab ainult videotunnis?**
-A: Ei. Õpilane saab tagasisidet anda ka kodutööd lahendades — tegelikud lüngad ilmnevad just iseseisval lahendamisel. Sama QR-link töötab nii tunnis kui kodus.
-
-**Q: Mis on järgmine samm?**
-A: AI etapistus — õpetaja kleepib ülesande, AI pakub 3–7 lahenduslogikuks etappi, õpetaja kinnitab. Õpilane näeb etappe ja märgib täpse koha. See teeb klassipildist kuumakaardi.
-*(Kui aega lubab — klõpsa start-screen'il "Phase 2 eelvaade" linki, näita kuidas see välja näeb. URL: edunavi.vercel.app/preview.html)*
+**Q: Kuidas see erineb eKoolist?**
+A: eKool kogub andmeid. EduNavi tõlgendab neid. eKool ütleb: "Kerli sai 3 punkti." EduNavi ütleb: "Klass on jagatud kolme gruppi, 6 vajavad tuge tehtemustri tõttu, järgmine samm on kordus murdude liitmise kohta." Erinevus on andmetelt → otsuseni.
 
 **Q: Kus on AI?**
-A: Praeguses prototüübis on AI Phase 2. Phase 1 on andmekiht — me näitame, et õpilased oskavad signaali anda ja õpetaja näeb seda reaalajas. AI etapistuse eelvaade on edunavi.vercel.app/preview.html — see on järgmine kiht.
+A: Praegu kasutame reegliotsuseid, mis tuvastavad mustreid. *(click `/preview` link)* Phase 2 on AI etapistus — õpetaja annab ülesande, AI jagab selle õpilastele arusaadavateks etappideks ja näitab täpset raskuskoha. See on järgmine kiht.
 
-**Q: Mis juhtub pärast tundi?**
-A: *(klõpsa Lõpeta)* Õpetaja näeb tunni kokkuvõtet. Sisse logitud õpetaja näeb kõiki oma tunde — *(navigeeri /history.html-le)* — ajalugu, andmed, mustrid mitme tunni vahel.
+**Q: Kuidas õpetaja jõuab eKoolist andmed siia?**
+A: MVP-s simuleerime — sellepärast, et eKooli avatud API-t pole. Esimese koolipiloodi raames teeme partnerluse Tallinna Haridusametiga, kes on käivitanud võimendatud õpetaja mudeli. Andmed liiguvad faili eksportimise või otsese integratsiooniga.
 
-**Q: Kas Tallinna haridusamet on kontekstis?**
-A: Jah. Idee tuli "Võimendatud õpetaja" piloodist — koolidel oli infrastruktuur, aga puudus pedagoogiline otsustugi. EduNavi täidab selle tühiku.
+**Q: Aga andmekaitse?**
+A: MVP-s ei salvesta me õpilase isikut. Sessioon, ülesanne, soovitus, ajatempel. Õpetaja näeb ainult koondvaadet — kohapealne abiõpetaja näeb oma klassi nimesid. See on minimaalne andmekogum, mis on vajalik otsustuseks.
 
-**Q: Andmekaitse?**
-A: MVP-s ei salvesta me õpilase isikut. Sessioon, ülesanne, etapp, tagasiside, ajatempel. Punkt.
+**Q: Kas see töötab ainult matemaatikas?**
+A: Praegu jah — fookus on murdarvud, kuna matemaatikalünged kuhjuvad kõige kiiremini ja matemaatikaõpetajaid on kõige rohkem puudu. Sama struktuur (mustrid → grupp → soovitus) töötab ka teiste ainetega, kus on selge oskuste hierarhia.
 
-## What NOT to say on stage
+**Q: Kuidas õpetaja teab, et soovitus on õige?**
+A: Õpetaja kinnitab. EduNavi ei tee otsust õpetaja eest — ta teeb soovituse, õpetaja vaatab andmeid, kinnitab või muudab. Lõplik pedagoogiline otsus jääb õpetajale. See on osa konstitutsioonist.
 
-- ❌ "Me kasutame Supabase'i / Jitsit / Vercel'i." Tehnoloogia on infrastruktuur, mitte pitch.
-- ❌ "On veel palju vaja teha." Iga prototüüp on poolik. Ära viita oma puudustele.
+**Q: Mis on järgmine samm?**
+A: Üks koolipilood Tallinnas, järgmine kvartal. Mõõdame: ajakulu vähenemine, otsustuskindluse muutus, abivajajate märkamise täpsus. Kui need näitajad lähevad õigesse suunda, laiendame kahele koolile. Kui ei, parandame andmemudelit ja proovime uuesti.
+
+## What NOT to say
+
+- ❌ "Me kasutame Supabase'i / Vercel'i / Chart.js'i." Tehnoloogia on infrastruktuur, mitte pitch.
+- ❌ "On veel palju vaja teha." Iga prototüüp on poolik. Ära viita oma puudustele — too välja, mis töötab.
 - ❌ "AI lahendab kõik." Doc ütleb sõnaselgelt: AI ei asenda õpetaja otsust.
-- ❌ Üksikasjalikud arendusplaanid. President ei taha roadmap'i, ta tahab näha probleemi ja lahendust.
+- ❌ Üksikasjalikud tehnilised plaanid. President ja Markus tahavad näha probleemi → lahendust → mõõdetavat tulemust.
 
-## One thing to remember
+## URLs to memorize
 
-The demo's wow moment is silent. When the QR appears and the counter starts ticking, **don't fill the silence**. Let them scan. Let them feel it. Then talk.
+- `edunavi.vercel.app/class` — **the demo**. Open this on the projector.
+- `edunavi.vercel.app/tugi` — tugiõpetaja vaade, näita telefonis.
+- `edunavi.vercel.app/preview` — Phase 2 AI etapistus, mockup. Klõpsa Q&A ajal.
+- `edunavi.vercel.app/` — Phase 2 reaalajas tagasiside (live polling), maini ainult kui küsitakse.
 
-## Tomorrow-morning checklist
+## The core thesis (one line)
 
-**~15 minutes before pitch:**
+Eestis ei ole probleem õpilaste andmete puudus, vaid õpetaja võime teha õigel ajal õigeid otsuseid. EduNavi annab võimendatud õpetajale tööriista, et teha üks otsus minutiga.
 
-- [ ] Open `https://edunavi.vercel.app/` on the laptop driving the projector
-- [ ] Sign in with your account (so lesson gets saved + history works)
-- [ ] Click **Alusta tundi** once as a test → grant camera + mic in the Jitsi popup → confirm video shows up → click **Lõpeta** → confirm the summary modal appears → close it
-- [ ] Open your phone, scan the QR or open `https://edunavi.vercel.app/student.html?room=XXXX` to confirm the student page works on cellular (not just venue wifi)
-- [ ] Have one teammate already on `student.html` so the counter ticks 0 → 1 the moment you start (the counter being ≥1 prevents the awkward "is anyone here?" feeling if the audience is slow to scan)
+## What lands with this room specifically
 
-**Backup plan if internet dies:**
-- Phone screen-recording of the demo flow as a fallback video. Record one tonight after the deploy is stable.
-
-**During the pitch:**
-- Don't type — paste a pre-prepared exercise from your clipboard. Practice this.
-- Sample exercise that lands well: `Lahenda 7x − 5 = 16`. Short, classic, the math the audience can follow even if they're not teachers.
-
-**Failure modes you should be ready to laugh through:**
-- Vercel cold start → first page load may be slow. Warm it up by visiting the page 30 sec before pitching.
-- Jitsi prejoin overlay → click through it, ignore.
-- Audience phones can't scan → have the room code visible large; people can type it on `student.html`.
-- Empty chart for 10 seconds → fill the silence with the narrative ("üks õpetaja, sada õpilast, üks pilk").
-
-**The two URLs you should know by heart:**
-- `edunavi.vercel.app` — the live product
-- `edunavi.vercel.app/preview.html` — the Phase 2 mockup (click during Q&A if asked "where's the AI?")
+- **The President** wants to see a working Estonian product solving an Estonian problem. Lead with Tallinn, lead with the võimendatud õpetaja pilot, lead with PISA. Don't go global.
+- **Markus** wants to see real execution and pragmatism. Don't oversell — say "Phase 1 is rule-based, Phase 2 is LLM" honestly.
+- **Both** will probably ask "what's the business model?" Honest answer: "Institutional license to ministries / haridusametid in v2. Today the focus is proving the data layer works in Tallinn schools."
