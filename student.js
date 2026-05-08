@@ -7,7 +7,52 @@
     channel: null,
     currentExerciseId: null,
     answered: false,
+    jitsi: null,
   };
+
+  function startJitsi(roomCode) {
+    if (!window.JitsiMeetExternalAPI) return;
+    if (state.jitsi) { try { state.jitsi.dispose(); } catch (e) {} }
+    const roomName = (window.EDUNAVI_CONFIG.JITSI_ROOM_PREFIX || "edunavi-") + roomCode;
+    const container = $("jitsi-container");
+    container.innerHTML = "";
+    state.jitsi = new JitsiMeetExternalAPI("meet.jit.si", {
+      roomName,
+      parentNode: container,
+      width: "100%",
+      height: "100%",
+      userInfo: { displayName: "Õpilane" },
+      configOverwrite: {
+        prejoinPageEnabled: false,
+        prejoinConfig: { enabled: false },
+        startWithAudioMuted: true,
+        startWithVideoMuted: true,
+        disableDeepLinking: true,
+        disableInviteFunctions: true,
+        disableThirdPartyRequests: true,
+        hideConferenceSubject: true,
+        hideConferenceTimer: true,
+        disableProfile: true,
+        readOnlyName: true,
+        toolbarButtons: ["microphone", "camera", "fullscreen", "hangup"],
+        notifications: [],
+      },
+      interfaceConfigOverwrite: {
+        SHOW_JITSI_WATERMARK: false,
+        SHOW_POWERED_BY: false,
+        SHOW_BRAND_WATERMARK: false,
+        SHOW_PROMOTIONAL_CLOSE_PAGE: false,
+        MOBILE_APP_PROMO: false,
+        HIDE_INVITE_MORE_HEADER: true,
+        SHOW_CHROME_EXTENSION_BANNER: false,
+        DEFAULT_BACKGROUND: "#000000",
+        TOOLBAR_BUTTONS: ["microphone", "camera", "fullscreen", "hangup"],
+        DISABLE_PRESENCE_STATUS: true,
+        DISABLE_FOCUS_INDICATOR: true,
+        HIDE_DEEP_LINKING_LOGO: true,
+      },
+    });
+  }
 
   function getRoomFromUrl() {
     const u = new URL(window.location.href);
@@ -74,7 +119,7 @@
     $("lesson-view").style.display = "block";
     $("room-label").textContent = `tuba ${code}`;
 
-    $("jitsi-frame").src = EduNavi.jitsiStudentUrl(code, "Õpilane");
+    startJitsi(code);
 
     if (!EduNavi.isConfigured) {
       EduNavi.showConfigBanner();

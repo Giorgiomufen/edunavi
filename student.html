@@ -38,11 +38,7 @@
       </div>
 
       <div class="student-video">
-        <iframe
-          id="jitsi-frame"
-          allow="camera; microphone; fullscreen; display-capture; autoplay"
-          title="Live lesson video"
-        ></iframe>
+        <div id="jitsi-container" style="width:100%; height:100%;"></div>
       </div>
 
       <span class="section-heading" style="display: block; margin-bottom: 8px;">Ülesanne</span>
@@ -71,6 +67,7 @@
 
     <!-- Libs -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://meet.jit.si/external_api.js"></script>
     <script src="config.js"></script>
     <script src="shared.js"></script>
     <script src="student.js"></script>
