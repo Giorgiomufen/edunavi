@@ -458,38 +458,69 @@
     list.appendChild(li);
     li.querySelector("input").focus();
   }
-  async function postConfirmedSteps() {
+  function postConfirmedSteps() {
     const steps = readSteps();
     if (steps.length === 0) return;
     hideStepsReview();
     $("exercise-input").value = "";
-    await postStepsList(steps);
+    state.queuedSteps = steps;
+    state.queuedIndex = 0;
+    postQueuedStep();
+    showStepNav();
   }
 
-  async function postStepsList(lines) {
-    const post = $("post-btn");
-    const propose = $("propose-btn");
-    post.disabled = true; propose.disabled = true;
-    for (let i = 0; i < lines.length; i++) {
-      const text = `${i + 1}. samm — ${lines[i]}`;
-      const exercise = { id: EduNavi.newExerciseId(), text, ts: Date.now() };
-      state.currentExerciseId = exercise.id;
-      state.stats.exercises++;
-      state.respondedSessions = new Set();
-      setCurrentExercise(text);
-      resetCounts();
-      updateStats();
-      updateResponseRate();
-      if (state.channel) {
-        state.channel.sendExercise(exercise);
-        state.channel.updatePresence({ currentExercise: exercise });
-      }
-      if (state.lessonId) {
-        EduNaviDB.logExercise({ lessonId: state.lessonId, id: exercise.id, text });
-      }
-      if (i < lines.length - 1) await new Promise((r) => setTimeout(r, 4000));
+  function postQueuedStep() {
+    const i = state.queuedIndex;
+    const lines = state.queuedSteps;
+    if (!lines || i >= lines.length) return;
+    const text = `${i + 1}. samm — ${lines[i]}`;
+    const exercise = { id: EduNavi.newExerciseId(), text, ts: Date.now() };
+    state.currentExerciseId = exercise.id;
+    state.stats.exercises++;
+    state.respondedSessions = new Set();
+    setCurrentExercise(text);
+    resetCounts();
+    updateStats();
+    updateResponseRate();
+    if (state.channel) {
+      state.channel.sendExercise(exercise);
+      state.channel.updatePresence({ currentExercise: exercise });
     }
-    post.disabled = false; propose.disabled = false;
+    if (state.lessonId) {
+      EduNaviDB.logExercise({ lessonId: state.lessonId, id: exercise.id, text });
+    }
+    updateStepNav();
+  }
+
+  function nextQueuedStep() {
+    state.queuedIndex++;
+    if (state.queuedIndex >= state.queuedSteps.length) {
+      hideStepNav();
+      return;
+    }
+    postQueuedStep();
+  }
+
+  function endQueuedSteps() {
+    state.queuedSteps = [];
+    state.queuedIndex = 0;
+    hideStepNav();
+  }
+
+  function showStepNav() {
+    document.querySelector(".lesson-input-bar").style.display = "none";
+    $("step-nav").style.display = "flex";
+  }
+  function hideStepNav() {
+    $("step-nav").style.display = "none";
+    document.querySelector(".lesson-input-bar").style.display = "";
+  }
+  function updateStepNav() {
+    const total = state.queuedSteps.length;
+    const at = state.queuedIndex + 1;
+    $("step-nav-position").textContent = `${at} / ${total}`;
+    const isLast = state.queuedIndex >= total - 1;
+    $("step-nav-next").textContent = isLast ? "Lõpeta jada" : "Järgmine samm →";
   }
 
   // Post each newline as a separate exercise, with a delay between them.
@@ -670,6 +701,8 @@
     $("steps-cancel").addEventListener("click", hideStepsReview);
     $("steps-add").addEventListener("click", addStepRow);
     $("steps-post-all").addEventListener("click", postConfirmedSteps);
+    $("step-nav-next").addEventListener("click", nextQueuedStep);
+    $("step-nav-cancel").addEventListener("click", endQueuedSteps);
     $("reset-btn").addEventListener("click", manualReset);
     $("end-btn").addEventListener("click", endLesson);
     $("mic-btn").addEventListener("click", toggleAudio);
