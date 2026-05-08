@@ -618,14 +618,14 @@
 
     // Track these in teacher state so the chart aggregates correctly per step.
     state.currentStepSet = { id: stepSetId, steps: stepObjects };
-    state.currentExerciseId = stepObjects[stepObjects.length - 1].id; // chart shows the latest
+    // No single "current" exercise in step-set mode — students vote per step independently.
+    state.currentExerciseId = null;
     state.stats.exercises += stepObjects.length;
     state.respondedSessions = new Set();
     stepObjects.forEach((ex) => trackExercise(ex.id, ex.text));
     updatePolarChart();
 
-    // Show the LAST step as "current exercise" — chart will fill from per-step responses
-    setCurrentExercise(stepObjects[stepObjects.length - 1].text);
+    setCurrentExercise(`${stepObjects.length} etapi jada · iga õpilane töötab oma tempos · vaata kuumakaarti`);
     resetCounts();
     updateStats();
     updateResponseRate();
