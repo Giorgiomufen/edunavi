@@ -430,6 +430,35 @@ body.history-body {
   padding: 16px 48px;
   letter-spacing: 0.3em;
 }
+.start-details {
+  margin-top: 24px;
+  text-align: left;
+  max-width: 380px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.start-details summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 8px;
+}
+.start-details summary:hover { color: var(--text); }
+.start-details-grid {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+.start-details-grid input {
+  border: 1px solid var(--line);
+  padding: 10px 14px;
+  font-size: 14px;
+  background: rgba(255,255,255,0.02);
+}
 
 /* === App shell === */
 .app {

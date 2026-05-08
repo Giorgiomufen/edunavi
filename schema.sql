@@ -9,9 +9,14 @@ create table if not exists public.lessons (
   teacher_id  uuid references auth.users(id) on delete set null,
   room_code   text not null,
   topic       text,
+  school      text,
+  class_name  text,
   created_at  timestamptz not null default now(),
   ended_at    timestamptz
 );
+-- Backfill columns on existing tables (idempotent)
+alter table public.lessons add column if not exists school text;
+alter table public.lessons add column if not exists class_name text;
 create index if not exists lessons_room_code_idx on public.lessons (room_code);
 create index if not exists lessons_teacher_idx   on public.lessons (teacher_id, created_at desc);
 

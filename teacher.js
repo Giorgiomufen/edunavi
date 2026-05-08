@@ -10,6 +10,8 @@
     currentExerciseId: null,
     counts: { yes: 0, unsure: 0, no: 0 },
     stats: { exercises: 0, responses: 0, yes: 0 },
+    studentCount: 0,
+    respondedSessions: new Set(),
     chart: null,
     jitsi: null,
   };
@@ -59,6 +61,18 @@
       $("stat-understanding").textContent = pct + "%";
     } else {
       $("stat-understanding").textContent = "—";
+    }
+  }
+
+  function updateResponseRate() {
+    const el = $("response-rate");
+    if (!el) return;
+    const responded = state.respondedSessions.size;
+    const total = state.studentCount || 0;
+    if (total === 0 || !state.currentExerciseId) {
+      el.textContent = "—";
+    } else {
+      el.textContent = `${responded} / ${total}`;
     }
   }
 
@@ -265,9 +279,11 @@
     };
     state.currentExerciseId = exercise.id;
     state.stats.exercises++;
+    state.respondedSessions = new Set();
     setCurrentExercise(text);
     resetCounts();
     updateStats();
+    updateResponseRate();
     if (state.channel) {
       state.channel.sendExercise(exercise);
       state.channel.updatePresence({ currentExercise: exercise });
@@ -309,9 +325,15 @@
     }
 
     // Persist the lesson row first so we can log exercises/responses against it.
+    const school = ($("school-input") && $("school-input").value.trim()) || null;
+    const className = ($("class-input") && $("class-input").value.trim()) || null;
+    const topic = ($("topic-input") && $("topic-input").value.trim()) || null;
     state.lessonId = await EduNaviDB.createLesson({
       roomCode: code,
       teacherId: state.user ? state.user.id : null,
+      school,
+      className,
+      topic,
     });
 
     state.channel = EduNavi.openRoomChannel(code, "teacher", {
@@ -321,12 +343,16 @@
           else if (r.answer === "no") state.counts.no++;
           else if (r.answer === "unsure") state.counts.unsure++;
           state.stats.responses++;
+          if (r.sessionId) state.respondedSessions.add(r.sessionId);
           updateChart();
           updateStats();
+          updateResponseRate();
         }
       },
       onPresence: (n) => {
+        state.studentCount = n;
         $("student-count").textContent = String(n);
+        updateResponseRate();
       },
       onStatus: setConnection,
     });

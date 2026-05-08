@@ -13,7 +13,7 @@
     return window._edunaviSb;
   }
 
-  async function createLesson({ roomCode, topic, teacherId }) {
+  async function createLesson({ roomCode, topic, teacherId, school, className }) {
     const c = client();
     if (!c) return null;
     const { data, error } = await c
@@ -22,6 +22,8 @@
         room_code: roomCode,
         topic: topic || null,
         teacher_id: teacherId || null,
+        school: school || null,
+        class_name: className || null,
       })
       .select("id")
       .single();

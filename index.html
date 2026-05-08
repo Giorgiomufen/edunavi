@@ -27,6 +27,14 @@
         <h1 class="display">EduNavi</h1>
         <p>Õpetaja otsustugi reaalajas.</p>
         <button class="primary start-button" id="start-btn">Alusta tundi</button>
+        <details class="start-details">
+          <summary>Lisaandmed (valikuline)</summary>
+          <div class="start-details-grid">
+            <input type="text" id="school-input" placeholder="Kool" autocomplete="organization" />
+            <input type="text" id="class-input" placeholder="Klass" autocomplete="off" />
+            <input type="text" id="topic-input" placeholder="Teema" autocomplete="off" />
+          </div>
+        </details>
         <p style="margin-top:24px; font-size:12px; color:var(--muted-2); letter-spacing:0.1em;">
           Anonüümselt töötab kohe. Tundide salvestamiseks saad luua konto paremal üleval.
         </p>
@@ -90,7 +98,13 @@
           </div>
 
           <div class="sidebar-card">
-            <span class="eyebrow">Praegune ülesanne</span>
+            <div style="display:flex; justify-content:space-between; align-items:baseline;">
+              <span class="eyebrow">Praegune ülesanne</span>
+              <span style="font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--muted);">
+                <span id="response-rate">—</span>
+                <span style="font-size:9px; letter-spacing:0.2em; text-transform:uppercase; margin-left:4px;">vastanud</span>
+              </span>
+            </div>
             <div id="current-exercise" class="current-exercise empty">
               Pole aktiivset ülesannet
             </div>
