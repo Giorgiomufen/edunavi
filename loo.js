@@ -170,11 +170,7 @@
 
   // ---------- Phase 1 → 2: generate ----------
   function onGenerate() {
-    const schoolSel = $("school").value;
-    const schoolOther = $("school-other").value.trim();
-    state.school = schoolSel === "__other__"
-      ? (schoolOther || null)
-      : (schoolSel || null);
+    state.school = $("school").value || null;
     state.topic = null;
     state.targetClasses = getCheckedClasses();
     const problems = parseDocument($("document").value);
@@ -417,11 +413,7 @@
     $("document").addEventListener("input", updateExerciseCount);
     $("generate-btn").addEventListener("click", onGenerate);
     if ($("school")) $("school").addEventListener("change", (e) => {
-      const v = e.target.value;
-      $("school-other").style.display = v === "__other__" ? "block" : "none";
-      if (v === "__other__") $("school-other").focus();
-      // Rebuild classes per school. "Muu kool" → use default fallback grid.
-      buildClassesGrid(v === "__other__" ? "__default__" : (v || null));
+      buildClassesGrid(e.target.value || null);
     });
     if ($("preview-close")) $("preview-close").addEventListener("click", hidePreview);
     if ($("preview-modal")) $("preview-modal").addEventListener("click", (e) => {
