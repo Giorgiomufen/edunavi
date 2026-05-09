@@ -207,8 +207,8 @@
   // raskuste hulga põhjal.
   function renderRecommendation(allSteps) {
     if (allSteps.length === 0) {
-      $("lesson-headline").textContent = "Tunnis pole etappe.";
-      $("lesson-detail").textContent = "Lisa /loo lehel ülesandeid ja etappe.";
+      $("lesson-headline").textContent = "Tunnis pole teemasid.";
+      $("lesson-detail").textContent = "Lisa /loo lehel ülesandeid ja teemasid.";
       return;
     }
     const withResponses = allSteps.filter((s) => s.total > 0);
@@ -227,53 +227,53 @@
     const isBigProblem = stuckCount >= Math.ceil(totalCount * 0.5);   // FR-35
     const isSmallProblem = stuckCount > 0 && stuckCount <= 4;
 
-    // Mitu etappi on punased? → tund vajab ümberplaneerimist
+    // Mitu teemat on punased? → tund vajab ümberplaneerimist
     if (alertSteps.length >= 3) {
       $("lesson-headline").textContent =
-        `${alertSteps.length} etappi olid raskuses (>50% kinni). Tund vajab ümberplaneerimist.`;
+        `${alertSteps.length} teemat olid raskuses (>50% kinni). Tund vajab ümberplaneerimist.`;
       $("lesson-detail").textContent =
-        `Soovitus: planeeri järgmine tund ümber. Vii kõigepealt kõige raskemad etapid uuesti läbi: "${alertSteps.slice(0, 2).map((s) => s.text).join("\", \"")}". Kui võimalik, jaga klass kohapealse õpetaja ja võimendatud õpetaja vahel.`;
+        `Soovitus: planeeri järgmine tund ümber. Vii kõigepealt kõige raskemad teemad uuesti läbi: "${alertSteps.slice(0, 2).map((s) => s.text).join("\", \"")}". Kui võimalik, jaga klass kohapealse õpetaja ja võimendatud õpetaja vahel.`;
       return;
     }
 
-    // Suur probleem ühel etapil → võimendatud õpetaja peab uuesti selgitama
+    // Suur probleem ühel teemal → võimendatud õpetaja peab uuesti selgitama
     if (worst.stuckPct >= 50) {
       $("lesson-headline").textContent =
-        `Kõige raskem etapp: "${worst.text}" — ${worst.stuckPct}% jäi kinni (${stuckCount}/${totalCount}).`;
+        `Kõige raskem teema: "${worst.text}" — ${worst.stuckPct}% jäi kinni (${stuckCount}/${totalCount}).`;
       $("lesson-detail").textContent =
-        `Soovitus: võta see etapp järgmise tunni alguses uuesti läbi, enne kui edasi liigud. Ülesandes: "${worst.problemText}". Anna seejärel sarnane lisaülesanne, et kontrollida, kas mõistmine paranes.`;
+        `Soovitus: võta see teema järgmise tunni alguses uuesti läbi, enne kui edasi liigud. Ülesandes: "${worst.problemText}". Anna seejärel sarnane lisaülesanne, et kontrollida, kas mõistmine paranes.`;
       return;
     }
 
-    // Keskmine probleem mitmel etapil → liigu edasi, aga jälgi
+    // Keskmine probleem mitmel teemal → liigu edasi, aga jälgi
     if (warnSteps.length >= 2) {
       $("lesson-headline").textContent =
-        `${warnSteps.length} etappi vajavad veel kinnistust (21–50% kinni).`;
+        `${warnSteps.length} teemat vajavad veel kinnistust (21–50% kinni).`;
       $("lesson-detail").textContent =
         `Soovitus: liigu järgmise teema juurde, aga anna järgmises tunnis lisaharjutus järgmistel: ${warnSteps.slice(0, 3).map((s) => `"${s.text}"`).join(", ")}.`;
       return;
     }
 
-    // Väike probleem (3–4 last) ühel etapil → kohapealne õpetaja
+    // Väike probleem (3–4 last) ühel teemal → kohapealne õpetaja
     if (isSmallProblem && worst.stuckPct >= 21) {
       $("lesson-headline").textContent =
-        `Üksikud (${stuckCount}/${totalCount}) jäid kinni etapil "${worst.text}".`;
+        `Üksikud (${stuckCount}/${totalCount}) jäid kinni teemal "${worst.text}".`;
       $("lesson-detail").textContent =
         `Soovitus: suuna need õpilased kohapealse õpetaja juurde lisaselgituseks. Klassiga tervikuna võid edasi liikuda.`;
       return;
     }
 
-    // Üks keskmise raskusega etapp
+    // Üks keskmise raskusega teema
     if (worst.stuckPct >= 21) {
       $("lesson-headline").textContent =
-        `Klass tuli enamasti toime — etapp "${worst.text}" vajab veel kinnistust (${worst.stuckPct}% kinni).`;
+        `Klass tuli enamasti toime — teema "${worst.text}" vajab veel kinnistust (${worst.stuckPct}% kinni).`;
       $("lesson-detail").textContent =
-        `Soovitus: võid edasi liikuda, aga anna selle etapi kohta järgmises tunnis veel üks sarnane harjutusülesanne.`;
+        `Soovitus: võid edasi liikuda, aga anna selle teema kohta järgmises tunnis veel üks sarnane harjutusülesanne.`;
       return;
     }
 
     // Kõik on rohelises — liigu edasi
-    $("lesson-headline").textContent = `Klass sai kõigi etappidega hakkama (≤20% kinni).`;
+    $("lesson-headline").textContent = `Klass sai kõigi teemadega hakkama (≤20% kinni).`;
     $("lesson-detail").textContent = `Soovitus: liigu järgmise teema juurde. Suuna järgmise tunni rõhk uue materjali peale.`;
   }
 
@@ -300,7 +300,7 @@
         </header>
         <ol class="lesson-step-list">
           ${p.steps.length === 0
-            ? `<li class="lesson-step-empty">Selle ülesande all pole etappe.</li>`
+            ? `<li class="lesson-step-empty">Selle ülesande all pole teemasid.</li>`
             : p.steps.map((s) => stepRowHtml(s, totalSessions)).join("")}
         </ol>
       `;
@@ -372,7 +372,7 @@
 
     const stepIds = exercises.filter((e) => e.parent_exercise_id).map((e) => e.id);
     if (stepIds.length === 0) {
-      alert("Selle tunni all pole etappe (loo /loo lehel ülesandeid + etappe).");
+      alert("Selle tunni all pole teemasid (loo /loo lehel ülesandeid + teemasid).");
       btn.disabled = false; btn.textContent = "Lisa demo-vastused";
       return;
     }

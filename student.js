@@ -217,8 +217,8 @@
     }
   }
 
-  // FR-13 — Teema-režiim: ainult etapinimed kuvatud, üks ühik valik
-  // ("kus jäid kinni?"). Klikiga märgib selle etapi 'no' või 'unsure'.
+  // FR-13 — Teema-režiim: ainult teemanimed kuvatud, üks ühik valik
+  // ("kus jäid kinni?"). Klikiga märgib selle teema 'no' või 'unsure'.
   function renderThemeMode(parentId, steps) {
     const single = $("single-exercise-box");
     const lbl = $("single-answer-label");
@@ -248,7 +248,7 @@
     okLi.className = "student-step student-theme-ok";
     okLi.innerHTML = `<button class="theme-ok-btn">Sain hakkama kõigega</button>`;
     okLi.querySelector("button").addEventListener("click", () => {
-      // Märgi 'yes' iga etapile (tähendab: said hakkama)
+      // Märgi 'yes' iga teemale (tähendab: said hakkama)
       steps.forEach((step) => {
         const dummyLi = document.createElement("li");
         answerStep(step.id, "yes", dummyLi);
@@ -439,11 +439,11 @@
     const mode = bundle.parent.display_mode || "full";
 
     if (mode === "blind" || !bundle.steps || bundle.steps.length === 0) {
-      // Pime tagasiside — õpilane ei näe etappe ette. Üks valik kogu ülesande kohta.
+      // Pime tagasiside — õpilane ei näe teemasid ette. Üks valik kogu ülesande kohta.
       showSingleMode();
       enableButtons(true);
     } else if (mode === "theme") {
-      // Teema-režiim — õpilane näeb teema/etapi nimesid, valib kus jäi kinni.
+      // Teema-režiim — õpilane näeb teemade nimesid, valib kus jäi kinni.
       renderThemeMode(bundle.parent.id, bundle.steps);
     } else {
       // Täisrežiim — senine käitumine.

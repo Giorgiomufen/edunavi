@@ -18,57 +18,84 @@
     roomCode: null,
   };
 
-  // ---------- Rule-based "AI" step proposal (same logic as teacher.js) ----------
+  // Rule-based "AI" — pakub MATEMAATIKATEEMAD (õppeaine sisulised mõisted),
+  // mitte protseduurilisi samme. Doc FR-07 + FR-08: õpilasele arusaadav,
+  // mitte liiga üldine. Näited: taandamine, koondamine, tegurdamine,
+  // ümardamine, võrrandi koostamine.
   function proposeStepsFor(text) {
     const t = (text || "").toLowerCase().replace(/\s+/g, " ").trim();
-    const lin = t.match(/(\d+)\s*x\s*([+\-−])\s*(\d+)\s*=\s*(-?\d+)/);
-    if (lin) {
-      const a = lin[1], op = lin[2], b = lin[3];
-      const inverse = (op === "+" ? "Lahuta" : "Lisa");
+
+    // Lineaarvõrrand
+    if (/(\d+)\s*x\s*([+\-−])\s*(\d+)\s*=\s*(-?\d+)/.test(t) || /lineaar/.test(t)) {
       return [
-        `${inverse} ${b} mõlemale poolele võrrandist`,
-        `Jaga mõlemad pooled ${a}-ga`,
-        `Saadud x väärtus — kontrolli see algvõrrandis`,
+        "Võrrandi teisendamine",
+        "Liikmete koondamine",
+        "Muutuja avaldamine",
+        "Lahendi kontroll",
       ];
     }
-    if (/x\s*\^?\s*2|x²/.test(t) && t.includes("=")) {
+    // Ruutvõrrand
+    if (/x\s*\^?\s*2|x²|ruutvõrr|ruutvorr/.test(t) && t.includes("=")) {
       return [
-        "Vii kõik liikmed ühele poolele, et oleks 0",
-        "Tegurda või kasuta diskriminandi valemit b² − 4ac",
-        "Leia x väärtused valemiga (−b ± √D) / 2a",
-        "Kontrolli mõlemad lahendid algvõrrandis",
+        "Võrrandi normaalkuju",
+        "Diskriminant",
+        "Tegurdamine",
+        "Lahendite leidmine",
+        "Lahendite kontroll",
       ];
     }
+    // Funktsiooni uurimine
     if (/f\s*\(\s*x\s*\)/.test(t) || /funktsioon/.test(t) || /tuletis/.test(t)) {
       return [
-        "Funktsiooni nullkohtade leidmine",
+        "Funktsiooni nullkohad",
         "Tuletise leidmine",
-        "Märgitabeli koostamine",
-        "Kasvamis- ja kahanemisvahemike määramine",
-        "Ekstreemumite leidmine",
+        "Märgitabel",
+        "Kasvamise ja kahanemise vahemikud",
+        "Ekstreemumid",
       ];
     }
+    // Murrud
     if (/\d+\/\d+|murru|murd/.test(t)) {
       return [
-        "Leia ühine nimetaja",
-        "Teisenda kõik murrud ühise nimetajaga",
-        "Liida või lahuta lugejad, nimetaja jääb sama",
-        "Lihtsusta vastust kui võimalik",
+        "Ühine nimetaja",
+        "Murdude teisendamine",
+        "Liitmine ja lahutamine",
+        "Taandamine",
       ];
     }
-    if (t.split("=").length > 2 || /süsteem/.test(t)) {
+    // Võrrandisüsteem
+    if (t.split("=").length > 2 || /süsteem|susteem/.test(t)) {
       return [
-        "Avalda üks muutuja teise kaudu ühest võrrandist",
-        "Asenda see avaldis teise võrrandisse",
-        "Lahenda saadud üks-muutujaline võrrand",
-        "Leia ka teine muutuja, kontrolli mõlemas algvõrrandis",
+        "Avaldamine",
+        "Asendamine",
+        "Muutujate leidmine",
+        "Lahendi kontroll",
       ];
     }
+    // Tekstülesanne / üldine
+    if (/tekst|sõnaline|sonaline/.test(t)) {
+      return [
+        "Andmete eraldamine",
+        "Võrrandi koostamine",
+        "Lahendamine",
+        "Vastuse kontroll",
+      ];
+    }
+    // Avaldis
+    if (/avaldis|liht|koonda/.test(t)) {
+      return [
+        "Sulgude avamine",
+        "Sarnaste liikmete koondamine",
+        "Tegurdamine",
+        "Taandamine",
+      ];
+    }
+    // Üldine vaikimisi
     return [
-      "Eralda olulised andmed ülesandest",
-      "Vali sobiv meetod või valem",
-      "Tee arvutused samm-sammult",
-      "Kontrolli vastust algse ülesandega",
+      "Andmete eraldamine",
+      "Meetodi valik",
+      "Arvutused",
+      "Vastuse kontroll",
     ];
   }
 
@@ -164,7 +191,7 @@
     });
     const ind = $("loo-step-indicator");
     if (name === "phase-input") ind.textContent = "1 / 3 · andmed";
-    else if (name === "phase-review") ind.textContent = "2 / 3 · etappide kinnitamine";
+    else if (name === "phase-review") ind.textContent = "2 / 3 · teemade kinnitamine";
     else if (name === "phase-done") ind.textContent = "3 / 3 · valmis";
   }
 
@@ -205,16 +232,16 @@
         <div class="loo-mode-row">
           <label class="loo-mode-label">Õpilane näeb:</label>
           <select class="loo-mode-select">
-            <option value="full"${problem.displayMode === "full" ? " selected" : ""}>Täisrežiim — kõik etapid nähtavad</option>
+            <option value="full"${problem.displayMode === "full" ? " selected" : ""}>Täisrežiim — kõik teemad nähtavad</option>
             <option value="theme"${problem.displayMode === "theme" ? " selected" : ""}>Teema-režiim — ainult teemade nimed</option>
-            <option value="blind"${problem.displayMode === "blind" ? " selected" : ""}>Pime tagasiside — ei näe etappe ette</option>
+            <option value="blind"${problem.displayMode === "blind" ? " selected" : ""}>Pime tagasiside — ei näe teemasid ette</option>
           </select>
         </div>
         <div class="loo-steps">
-          <span class="eyebrow" style="margin-bottom:8px;">Etapid</span>
+          <span class="eyebrow" style="margin-bottom:8px;">Teemad</span>
           <ol class="loo-step-list"></ol>
           <div class="loo-step-actions">
-            <button class="loo-step-add" type="button">+ Lisa etapp</button>
+            <button class="loo-step-add" type="button">+ Lisa teema</button>
             <button class="loo-step-regen" type="button">↻ Genereeri uuesti</button>
           </div>
         </div>
@@ -255,7 +282,7 @@
       <input type="text" value="${escapeHtml(value)}" />
       <button class="loo-step-up" type="button" title="Liiguta ülespoole" ${isFirst ? "disabled" : ""}>↑</button>
       <button class="loo-step-down" type="button" title="Liiguta allapoole" ${isLast ? "disabled" : ""}>↓</button>
-      <button class="loo-step-remove" type="button" title="Eemalda etapp">×</button>
+      <button class="loo-step-remove" type="button" title="Eemalda teema">×</button>
     `;
     const input = li.querySelector("input");
     input.addEventListener("input", (e) => {
@@ -348,7 +375,7 @@
         <div class="loo-qr-canvas"></div>
         <div class="loo-qr-link mono">${url.replace(window.location.origin, "")}</div>
         <div class="loo-qr-steps">
-          <span class="eyebrow" style="font-size:10px;">${problem.steps.length} etappi</span>
+          <span class="eyebrow" style="font-size:10px;">${problem.steps.length} teemat</span>
           <ol>${problem.steps.map((s) => `<li>${escapeHtml(s)}</li>`).join("")}</ol>
         </div>
       `;
@@ -394,7 +421,7 @@
             </li>
           `).join("")}
         </ol>
-      ` : `<p style="color:var(--muted); font-size:13px;">Sellel ülesandel pole etappe.</p>`}
+      ` : `<p style="color:var(--muted); font-size:13px;">Sellel ülesandel pole teemasid.</p>`}
     `;
     $("preview-modal").classList.add("show");
   }
