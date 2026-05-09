@@ -86,6 +86,35 @@
   function parseClassList(s) {
     return (s || "").split(/[,;\n]/).map((x) => x.trim()).filter(Boolean);
   }
+
+  // Build the class checkbox grid: 8.A — 12.C
+  function buildClassesGrid() {
+    const grid = $("classes-grid");
+    if (!grid || grid.dataset.built) return;
+    const grades = [8, 9, 10, 11, 12];
+    const letters = ["A", "B", "C"];
+    const html = grades.map((g) => `
+      <div class="classes-row">
+        ${letters.map((L) => {
+          const v = `${g}.${L}`;
+          return `<label class="class-check">
+            <input type="checkbox" value="${v}" />
+            <span>${v}</span>
+          </label>`;
+        }).join("")}
+      </div>
+    `).join("");
+    grid.innerHTML = html;
+    grid.dataset.built = "1";
+  }
+
+  function getCheckedClasses() {
+    const checked = [...document.querySelectorAll('#classes-grid input[type="checkbox"]:checked')]
+      .map((c) => c.value);
+    const custom = parseClassList($("classes-other") ? $("classes-other").value : "");
+    // de-dupe
+    return [...new Set([...checked, ...custom])];
+  }
   function parseDocument(s) {
     return (s || "")
       .split(/\n\s*\n/)
@@ -128,7 +157,7 @@
       ? (schoolOther || null)
       : (schoolSel || null);
     state.topic = $("topic").value.trim() || null;
-    state.targetClasses = parseClassList($("classes").value);
+    state.targetClasses = getCheckedClasses();
     const problems = parseDocument($("document").value);
     if (problems.length === 0) {
       showError("Lisa vähemalt üks ülesanne.");
@@ -365,6 +394,7 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
+    buildClassesGrid();
     $("document").addEventListener("input", updateExerciseCount);
     $("generate-btn").addEventListener("click", onGenerate);
     if ($("school")) $("school").addEventListener("change", (e) => {

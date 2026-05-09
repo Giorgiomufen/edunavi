@@ -2962,3 +2962,46 @@ body.student-body { overflow-y: auto; height: auto; }
   cursor: pointer;
 }
 .loo-select:focus { outline: 2px solid var(--accent, #0369A1); outline-offset: 1px; }
+
+/* /loo — klasside checkbox-võre */
+.classes-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.classes-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.class-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 120ms;
+  user-select: none;
+}
+.class-check input[type="checkbox"] {
+  margin: 0;
+  accent-color: var(--brand-teacher, #1E3A5F);
+  cursor: pointer;
+}
+.class-check:hover {
+  border-color: var(--brand-teacher, #1E3A5F);
+}
+.class-check:has(input:checked) {
+  background: var(--brand-teacher, #1E3A5F);
+  border-color: var(--brand-teacher, #1E3A5F);
+  color: #fff;
+}
+.class-check span {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
