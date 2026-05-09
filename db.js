@@ -29,11 +29,16 @@
     if (Array.isArray(targetClasses) && targetClasses.length > 0) {
       row.target_classes = targetClasses;
     }
-    const { data, error } = await c
+    let { data, error } = await c
       .from("lessons")
       .insert(row)
       .select("id")
       .single();
+    // Auto-retry without target_classes if column missing
+    if (error && /target_classes/i.test(`${error.message} ${error.details}`)) {
+      delete row.target_classes;
+      ({ data, error } = await c.from("lessons").insert(row).select("id").single());
+    }
     if (error) {
       console.error("[db] createLesson failed", error);
       window._edunaviLastError = `${error.code || ""} ${error.message || error.details || error}`.trim();
