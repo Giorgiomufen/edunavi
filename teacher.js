@@ -705,16 +705,18 @@
 
     // Broadcast as a single step_set event AND each as an exercise (for back-compat).
     if (state.channel) {
-      state.channel.channel.send({
-        type: "broadcast",
-        event: "step_set",
-        payload: { stepSetId, steps: stepObjects, ts: Date.now() },
-      });
-      // Also broadcast each as exercise for any client that doesn't grok step_set yet.
+      try {
+        if (state.channel.sendStepSet) {
+          state.channel.sendStepSet({ stepSetId, steps: stepObjects, ts: Date.now() });
+        }
+      } catch (e) { console.warn("step_set broadcast failed", e); }
+      // Also broadcast each as exercise — proven path; ensures students see something even if step_set fails.
       stepObjects.forEach((ex) => {
-        state.channel.sendExercise(ex);
+        try { state.channel.sendExercise(ex); } catch (e) { console.warn("exercise broadcast failed", e); }
       });
-      state.channel.updatePresence({ currentStepSet: { id: stepSetId, steps: stepObjects } });
+      try {
+        state.channel.updatePresence({ currentStepSet: { id: stepSetId, steps: stepObjects } });
+      } catch (e) { console.warn("presence update failed", e); }
     }
     if (state.lessonId) {
       stepObjects.forEach((ex) => {

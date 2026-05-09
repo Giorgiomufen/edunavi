@@ -172,6 +172,8 @@
         channel.send({ type: "broadcast", event: "comment", payload: data }),
       sendLessonEnd: (data = {}) =>
         channel.send({ type: "broadcast", event: "lesson_end", payload: data }),
+      sendStepSet: (data) =>
+        channel.send({ type: "broadcast", event: "step_set", payload: data }),
       updatePresence: async (extra) => {
         currentTrack = { ...currentTrack, ...extra };
         return channel.track(currentTrack);
