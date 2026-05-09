@@ -1,0 +1,11 @@
+<svg viewBox="0 0 320 80" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="160" cy="40" rx="158" ry="38" fill="#FFFFFF" stroke="#0F172A" stroke-width="2"/>
+  <rect x="36" y="47" width="11" height="15" rx="3" fill="#F97316"/>
+  <rect x="53" y="38" width="11" height="24" rx="3" fill="#FACC15"/>
+  <rect x="70" y="26" width="11" height="36" rx="3" fill="#22C55E"/>
+  <rect x="87" y="12" width="11" height="50" rx="3" fill="#5B21B6"/>
+  <circle cx="92" cy="12" r="10" fill="#0D9488"/>
+  <polyline points="86,12 91,18 99,6" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="112" y="56" font-family="Urbanist, sans-serif" font-weight="500" font-size="34" fill="#1E3A5F" letter-spacing="1">Edu</text>
+  <text x="180" y="56" font-family="Urbanist, sans-serif" font-weight="500" font-size="34" fill="#5B21B6" letter-spacing="1">Navi</text>
+</svg>
