@@ -176,9 +176,8 @@
       li.innerHTML = `
         <div class="student-step-text">${escapeHtml(step.text)}</div>
         <div class="student-step-buttons">
-          <button data-answer="yes">Sain aru</button>
-          <button data-answer="unsure">Pole kindel</button>
-          <button data-answer="no">Ei saanud aru</button>
+          <button data-answer="no">Ei saanud aru üldse</button>
+          <button data-answer="unsure">Sain aru, aga TI aitas</button>
         </div>
       `;
       li.querySelectorAll("button").forEach((b) => {

@@ -150,20 +150,27 @@
     <!-- App -->
     <div id="app" class="app" style="display:none">
       <header class="app-header">
-        <div class="wordmark">EduNavi <small>Õpetaja</small></div>
+        <a href="/" class="wordmark" style="border:0; color:var(--text);" title="Tagasi avalehele">EduNavi <small>Õpetaja</small></a>
         <div></div>
         <div class="right">
-          <button id="mic-btn" class="ctrl-btn" data-on="true">Mikrofon</button>
-          <button id="cam-btn" class="ctrl-btn" data-on="true">Kaamera</button>
           <span class="pill" id="conn-pill"><span id="conn-text">ühendamine</span></span>
           <button id="end-btn">Lõpeta</button>
         </div>
       </header>
 
       <main class="lesson-grid">
-        <div class="lesson-video">
-          <div class="video-empty">Video laadimisel</div>
-          <div id="jitsi-container" style="position:relative; width:100%; height:100%;"></div>
+        <div class="lesson-main">
+          <div class="lesson-main-card">
+            <span class="eyebrow">Praegune ülesanne</span>
+            <div id="big-current-exercise" class="big-current-exercise empty">Pole aktiivset ülesannet</div>
+          </div>
+          <div class="lesson-main-card">
+            <span class="eyebrow">Etappide kuumakaart</span>
+            <div class="big-polar-wrap">
+              <canvas id="polar-chart-big"></canvas>
+              <div id="polar-empty-big" class="polar-empty-big">Postita ülesanne, et näha klassi mõistmist iga etapi kohta</div>
+            </div>
+          </div>
         </div>
 
         <aside class="lesson-sidebar">
@@ -289,7 +296,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
-    <script src="https://meet.jit.si/external_api.js"></script>
     <script src="config.js"></script>
     <script src="shared.js"></script>
     <script src="db.js"></script>
