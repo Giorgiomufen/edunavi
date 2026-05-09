@@ -14,7 +14,6 @@
     studentCount: 0,
     respondedSessions: new Set(),
     // exerciseId -> { sessionId: 'yes'|'no'|'unsure' }
-    // single source of truth for response counts; replaces +1 increments
     perStepResponses: {},
     // ordered list of all exercises this lesson, for the polar chart
     exerciseOrder: [],
@@ -22,7 +21,66 @@
     polarChart: null,
     chart: null,
     jitsi: null,
+    // Per-class state for the Klassid panel
+    school: null,
+    targetClasses: [],            // ["8.A", "8.B", "8.C"] from teacher input
+    classSessions: {},            // klass -> Set<sessionId> currently joined
+    classResponses: {},           // klass -> { yes, unsure, no }
+    sessionClass: {},             // sessionId -> klass (for fast lookup)
   };
+
+  function parseClassList(raw) {
+    if (!raw) return [];
+    return raw.split(/[,;\n]/).map((s) => s.trim()).filter(Boolean);
+  }
+
+  function ensureClassBucket(klass) {
+    if (!klass) return;
+    if (!state.classSessions[klass]) state.classSessions[klass] = new Set();
+    if (!state.classResponses[klass]) state.classResponses[klass] = { yes: 0, unsure: 0, no: 0 };
+  }
+
+  function recomputeClassResponses() {
+    // Rebuild per-class response counts from the source of truth (perStepResponses + sessionClass).
+    state.classResponses = {};
+    state.targetClasses.forEach((c) => { state.classResponses[c] = { yes: 0, unsure: 0, no: 0 }; });
+    Object.values(state.perStepResponses).forEach((sessionMap) => {
+      Object.entries(sessionMap).forEach(([sid, ans]) => {
+        const klass = state.sessionClass[sid];
+        if (!klass) return;
+        ensureClassBucket(klass);
+        if (state.classResponses[klass][ans] !== undefined) {
+          state.classResponses[klass][ans]++;
+        }
+      });
+    });
+  }
+
+  function renderClassesCard() {
+    const card = $("classes-card");
+    if (!card) return;
+    const visible = state.targetClasses.length > 0;
+    if (!visible) { card.style.display = "none"; return; }
+    card.style.display = "flex";
+    if (state.school) $("classes-school").textContent = state.school;
+    const ul = $("classes-rows");
+    ul.innerHTML = "";
+    state.targetClasses.forEach((klass) => {
+      ensureClassBucket(klass);
+      const joined = state.classSessions[klass].size;
+      const counts = state.classResponses[klass];
+      const total = counts.yes + counts.unsure + counts.no;
+      const yesPct = total === 0 ? 0 : Math.round((counts.yes / total) * 100);
+      const li = document.createElement("li");
+      li.className = "class-row";
+      li.innerHTML = `
+        <span class="class-row-name">${klass}</span>
+        <span class="class-row-bar"><span class="seg seg-yes" style="width:${total === 0 ? 0 : (counts.yes / total) * 100}%"></span><span class="seg seg-mid" style="width:${total === 0 ? 0 : (counts.unsure / total) * 100}%"></span><span class="seg seg-no" style="width:${total === 0 ? 0 : (counts.no / total) * 100}%"></span></span>
+        <span class="class-row-meta mono">${joined} liit · ${total === 0 ? "—" : yesPct + "%"}</span>
+      `;
+      ul.appendChild(li);
+    });
+  }
 
   function recordResponse(exerciseId, sessionId, answer) {
     if (!exerciseId || !sessionId) return false;
@@ -352,6 +410,13 @@
     if (status === "SUBSCRIBED") {
       pill.classList.add("live");
       text.textContent = "Eetris";
+      // Publish target classes + school onto teacher presence so students can pick a class.
+      if (state.channel && (state.targetClasses.length > 0 || state.school)) {
+        state.channel.updatePresence({
+          targetClasses: state.targetClasses,
+          school: state.school,
+        });
+      }
     } else if (status === "DEMO_MODE") {
       text.textContent = "Demo režiim";
     } else if (status === "CHANNEL_ERROR") {
@@ -790,14 +855,20 @@
       state.lessonId = resume.lessonId;
     } else {
       const school = ($("school-input") && $("school-input").value.trim()) || null;
-      const className = ($("class-input") && $("class-input").value.trim()) || null;
+      const classesRaw = ($("classes-input") && $("classes-input").value.trim()) || "";
+      const targetClasses = parseClassList(classesRaw);
       const topic = ($("topic-input") && $("topic-input").value.trim()) || null;
+      state.school = school;
+      state.targetClasses = targetClasses;
+      targetClasses.forEach(ensureClassBucket);
+      renderClassesCard();
       state.lessonId = await EduNaviDB.createLesson({
         roomCode: code,
         teacherId: state.user ? state.user.id : null,
         school,
-        className,
+        className: targetClasses[0] || null,  // back-compat with single-class column
         topic,
+        targetClasses,
       });
     }
     persistActiveLesson();
@@ -806,10 +877,16 @@
       onResponse: (r) => {
         if (!r || !r.exerciseId || !r.answer) return;
         // Replace-not-add: a session's answer can only count once per step.
-        // If the same student switches yes→no, totals shift, not stack.
         const changed = recordResponse(r.exerciseId, r.sessionId || `anon-${Math.random()}`, r.answer);
-        if (!changed) return; // same answer as before — ignore
+        if (!changed) return;
         if (r.sessionId) state.respondedSessions.add(r.sessionId);
+        // Pick up the student's class if they sent one
+        if (r.sessionId && r.class) {
+          state.sessionClass[r.sessionId] = r.class;
+          ensureClassBucket(r.class);
+        }
+        recomputeClassResponses();
+        renderClassesCard();
         // Recompute current step's counts from the source of truth
         if (r.exerciseId === state.currentExerciseId) {
           state.counts = countsFor(r.exerciseId);
@@ -828,12 +905,41 @@
         updateResponseRate();
         updatePolarChart();
       },
-      onPresence: (n) => {
+      onPresence: (n, presenceState) => {
         state.studentCount = n;
         $("student-count").textContent = String(n);
+        // Rebuild per-class joined sets from authoritative presence state
+        const fresh = {};
+        if (presenceState) {
+          Object.values(presenceState).forEach((arr) => {
+            arr.forEach((p) => {
+              if (p && p.role === "student" && p.class) {
+                if (!fresh[p.class]) fresh[p.class] = new Set();
+                // sessionId comes from the channel's presence key prefix; fall back to a stable proxy
+                const sid = p.sessionId || p.joinedAt || JSON.stringify(p);
+                fresh[p.class].add(sid);
+                state.sessionClass[sid] = p.class;
+              }
+            });
+          });
+        }
+        // Apply: target classes get their fresh set; others stay (could be added)
+        state.targetClasses.forEach((c) => {
+          state.classSessions[c] = fresh[c] || new Set();
+        });
+        // Untagged classes that arrived (free-text fallback) — show them too
+        Object.keys(fresh).forEach((c) => {
+          if (!state.targetClasses.includes(c)) {
+            if (!state.classSessions[c]) state.classSessions[c] = new Set();
+            state.classSessions[c] = fresh[c];
+          }
+        });
+        recomputeClassResponses();
+        renderClassesCard();
         updateResponseRate();
       },
       onComment: (c) => {
+        // (handler below)
         if (!c || !c.text) return;
         const list = $("comments-list");
         const li = document.createElement("li");

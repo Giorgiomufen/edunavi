@@ -17,6 +17,7 @@ create table if not exists public.lessons (
 -- Backfill columns on existing tables (idempotent)
 alter table public.lessons add column if not exists school text;
 alter table public.lessons add column if not exists class_name text;
+alter table public.lessons add column if not exists target_classes text[];
 create index if not exists lessons_room_code_idx on public.lessons (room_code);
 create index if not exists lessons_teacher_idx   on public.lessons (teacher_id, created_at desc);
 

@@ -10,10 +10,49 @@
     currentExerciseId: null,
     answered: false,
     jitsi: null,
-    activeStepSet: null,      // { id, steps: [{id, text}] }
-    perStepAnswers: {},       // exerciseId -> 'yes'|'no'|'unsure'
+    activeStepSet: null,
+    perStepAnswers: {},
     lessonEnded: false,
+    chosenClass: null,        // student's picked class — included in every response/presence
+    offeredClasses: [],       // populated from teacher presence target_classes
   };
+
+  function renderClassPicker(classes) {
+    const wrap = $("class-picker");
+    if (!wrap) return;
+    if (!classes || classes.length === 0) {
+      wrap.style.display = "none";
+      return;
+    }
+    if (state.chosenClass) {
+      wrap.style.display = "none";
+      return;
+    }
+    state.offeredClasses = classes;
+    const opts = $("class-picker-options");
+    opts.innerHTML = "";
+    classes.forEach((klass) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "class-pick-btn";
+      b.textContent = klass;
+      b.addEventListener("click", () => pickClass(klass));
+      opts.appendChild(b);
+    });
+    wrap.style.display = "block";
+    // Hide voting until a class is chosen
+    enableButtons(false);
+  }
+
+  function pickClass(klass) {
+    state.chosenClass = klass;
+    $("class-picker").style.display = "none";
+    if (state.channel && state.channel.updatePresence) {
+      state.channel.updatePresence({ class: klass, sessionId: state.sessionId });
+    }
+    if (state.currentExerciseId) enableButtons(true);
+    setStatus(`Klass: ${klass}`, true);
+  }
 
   function startJitsi(roomCode) {
     if (!window.JitsiMeetExternalAPI) return;
@@ -159,6 +198,7 @@
       state.channel.sendResponse({
         exerciseId, answer,
         sessionId: state.sessionId,
+        class: state.chosenClass || null,
         ts: Date.now(),
       });
     }
@@ -204,6 +244,7 @@
         exerciseId: state.currentExerciseId,
         answer,
         sessionId: state.sessionId,
+        class: state.chosenClass || null,
         ts: Date.now(),
       });
     }
@@ -248,9 +289,7 @@
 
     function applyExercise(ex) {
       if (!ex || !ex.id) return;
-      // If this exercise is part of the active step set, ignore — we're in step list mode.
       if (state.activeStepSet && state.activeStepSet.steps.some((s) => s.id === ex.id)) return;
-      // Otherwise this is a single exercise → switch to single mode
       if (state.activeStepSet) {
         state.activeStepSet = null;
         state.perStepAnswers = {};
@@ -260,7 +299,9 @@
       state.currentExerciseId = ex.id;
       state.answered = false;
       setExercise(ex.text);
-      enableButtons(true);
+      // Only enable voting if no class picker is pending (or class already chosen)
+      const needsClass = state.offeredClasses.length > 0 && !state.chosenClass;
+      enableButtons(!needsClass);
       setStatus("");
     }
 
@@ -273,6 +314,10 @@
         setStatus("");
       },
       onPresence: (_count, _state, teacherState) => {
+        // Surface the class picker if teacher published target classes
+        if (teacherState && Array.isArray(teacherState.targetClasses) && teacherState.targetClasses.length > 0) {
+          if (!state.chosenClass) renderClassPicker(teacherState.targetClasses);
+        }
         // Late-joiner sync: pull current exercise OR step set from teacher's presence.
         if (teacherState && teacherState.currentStepSet) {
           applyStepSet(teacherState.currentStepSet);

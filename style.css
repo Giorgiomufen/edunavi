@@ -61,6 +61,17 @@ html, body {
   height: 100vh;
   overflow: hidden;
 }
+/* Pages that scroll vertically: lift the lock from <html> too */
+html:has(body.history-body),
+html:has(body.about-body),
+html:has(body.class-body),
+html:has(body.classes-body),
+html:has(body.preview-body),
+html:has(body.tugi-body),
+html:has(body.student-body) {
+  height: auto;
+  overflow: visible;
+}
 
 body { display: flex; flex-direction: column; }
 h1, h2, h3 { margin: 0; }
@@ -1129,12 +1140,15 @@ body.history-body {
 .start-screen {
   flex: 1;
   display: grid;
-  place-items: center;
+  place-items: start center;
   padding: 60px 24px;
   background:
     radial-gradient(circle at 50% 30%, rgba(15, 23, 42, 0.04), transparent 60%),
     var(--bg);
+  overflow-y: auto;
+  min-height: 100vh;
 }
+.start-screen .start-card { margin-top: clamp(0px, 8vh, 80px); }
 .start-card {
   max-width: 600px;
   width: 100%;
@@ -1490,6 +1504,59 @@ body.history-body {
 .sidebar-card.intervention {
   border-color: var(--warn);
   background: rgba(255, 85, 56, 0.08);
+}
+.classes-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.classes-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.classes-card-head .mono {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.classes-rows {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.class-row {
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+}
+.class-row-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+}
+.class-row-bar {
+  display: flex;
+  height: 8px;
+  border: 1px solid var(--line);
+  background: var(--color-surface-raised);
+  overflow: hidden;
+}
+.class-row-bar .seg { height: 100%; }
+.class-row-bar .seg-yes { background: var(--color-status-success); }
+.class-row-bar .seg-mid { background: var(--color-status-warning); }
+.class-row-bar .seg-no  { background: var(--color-status-danger); }
+.class-row-meta {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 .comments-list {
   list-style: none;
@@ -1947,6 +2014,34 @@ body.student-body { overflow-y: auto; height: auto; }
 .student-step.a-yes .student-step-buttons button[data-answer="yes"] { background: var(--text); color: var(--bg); border-color: var(--text); }
 .student-step.a-unsure .student-step-buttons button[data-answer="unsure"] { background: #888; color: var(--bg); border-color: #888; }
 .student-step.a-no .student-step-buttons button[data-answer="no"] { background: var(--warn); color: #fff; border-color: var(--warn); }
+
+.class-picker {
+  border: 1px solid var(--color-brand-student);
+  background: var(--color-brand-student-subtle);
+  padding: 18px 18px 22px;
+  margin-bottom: 22px;
+}
+.class-picker .eyebrow { color: var(--color-brand-student); display: block; margin-bottom: 12px; }
+.class-picker-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+.class-pick-btn {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: 0.05em;
+  padding: 18px 14px;
+  background: var(--color-surface-card);
+  color: var(--color-brand-student);
+  border: 1px solid var(--color-brand-student);
+}
+.class-pick-btn:hover:not(:disabled) {
+  background: var(--color-brand-student);
+  color: var(--color-text-inverse);
+  border-color: var(--color-brand-student);
+}
 
 .student-comment {
   margin-top: 26px;

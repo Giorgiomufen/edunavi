@@ -1,4 +1,4 @@
-/* history.js — Mine tunnid: show past lessons for the signed-in teacher */
+/* history.js — Minu tunnid: show past lessons for the signed-in teacher */
 (function () {
   const $ = (id) => document.getElementById(id);
 

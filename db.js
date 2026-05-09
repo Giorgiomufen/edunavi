@@ -13,18 +13,22 @@
     return window._edunaviSb;
   }
 
-  async function createLesson({ roomCode, topic, teacherId, school, className }) {
+  async function createLesson({ roomCode, topic, teacherId, school, className, targetClasses }) {
     const c = client();
     if (!c) return null;
+    const row = {
+      room_code: roomCode,
+      topic: topic || null,
+      teacher_id: teacherId || null,
+      school: school || null,
+      class_name: className || null,
+    };
+    if (Array.isArray(targetClasses) && targetClasses.length > 0) {
+      row.target_classes = targetClasses;
+    }
     const { data, error } = await c
       .from("lessons")
-      .insert({
-        room_code: roomCode,
-        topic: topic || null,
-        teacher_id: teacherId || null,
-        school: school || null,
-        class_name: className || null,
-      })
+      .insert(row)
       .select("id")
       .single();
     if (error) {

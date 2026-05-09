@@ -31,7 +31,7 @@
       <span id="top-auth-loading" style="color:var(--muted-2); font-size:11px; letter-spacing:0.25em; text-transform:uppercase;">kontroll</span>
       <button id="open-signin" class="link-button" style="display:none;">Logi sisse</button>
       <span id="top-auth-user" style="display:none; align-items:center; gap:14px;">
-        <a href="/history" class="link-button" style="font-size:12px;">Mine tunnid</a>
+        <a href="/history" class="link-button" style="font-size:12px;">Minu tunnid</a>
         <span id="user-email" class="mono" style="font-size:12px; color:var(--muted);"></span>
         <button id="signout-btn" style="font-size:10px; padding:6px 12px;">Logi välja</button>
       </span>
@@ -71,9 +71,9 @@
         <details class="start-details">
           <summary>Õpetaja: lisaandmed (valikuline)</summary>
           <div class="start-details-grid">
-            <input type="text" id="school-input" placeholder="Kool" autocomplete="organization" />
-            <input type="text" id="class-input" placeholder="Klass" autocomplete="off" />
-            <input type="text" id="topic-input" placeholder="Teema" autocomplete="off" />
+            <input type="text" id="school-input" placeholder="Kool (nt Tallinna 21. Kool)" autocomplete="organization" />
+            <input type="text" id="classes-input" placeholder="Klassid (komaga eraldatud, nt 8.A, 8.B, 8.C)" autocomplete="off" />
+            <input type="text" id="topic-input" placeholder="Teema (nt murdude põhitehted)" autocomplete="off" />
           </div>
         </details>
         <div class="extra-links">
@@ -212,6 +212,15 @@
                 <canvas id="response-chart"></canvas>
               </div>
             </details>
+          </div>
+
+          <div id="classes-card" class="sidebar-card classes-card" style="display:none;">
+            <div class="classes-card-head">
+              <span class="eyebrow">Klassid</span>
+              <span id="classes-school" class="mono"></span>
+            </div>
+            <ul id="classes-rows" class="classes-rows"></ul>
+            <a href="/klassid" class="link-button" style="font-size:11px; align-self:flex-end;">Vaata kõiki klasse →</a>
           </div>
 
           <div id="intervention-card" class="sidebar-card intervention" style="display:none;">
