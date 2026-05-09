@@ -459,6 +459,12 @@
       state.teemad = [];
       state.lessonId = null;
       state.roomCode = null;
+      state.school = null;
+      state.targetClasses = [];
+      state.displayMode = "full";
+      if ($("school")) $("school").value = "";
+      if ($("review-mode")) $("review-mode").value = "full";
+      buildClassesGrid(null);
       $("document").value = "";
       updateExerciseCount();
       showPhase("phase-input");

@@ -364,7 +364,7 @@
 
     const rows = [];
     targetClasses.forEach((klass, ki) => {
-      const N = 9 + Math.floor(Math.random() * 4);   // 9-12 students per class
+      const N = 22 + Math.floor(Math.random() * 6);   // 22-27 students per class — pitch-friendly response rate
       for (let s = 0; s < N; s++) {
         const sid = `demo-${lessonId.slice(0, 4)}-${ki}-${s}-${Date.now().toString(36)}`;
         stepIds.forEach((exId, idx) => {
