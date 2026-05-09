@@ -68,7 +68,14 @@ html:has(body.class-body),
 html:has(body.classes-body),
 html:has(body.preview-body),
 html:has(body.tugi-body),
-html:has(body.student-body) {
+html:has(body.student-body),
+html:has(body.loo-body),
+html:has(body.lesson-detail-body) {
+  height: auto;
+  overflow: visible;
+}
+body.loo-body,
+body.lesson-detail-body {
   height: auto;
   overflow: visible;
 }
