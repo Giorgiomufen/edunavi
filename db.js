@@ -15,7 +15,10 @@
 
   async function createLesson({ roomCode, topic, teacherId, school, className, targetClasses }) {
     const c = client();
-    if (!c) return null;
+    if (!c) {
+      window._edunaviLastError = "Supabase klient pole alustatud (config.js?)";
+      return null;
+    }
     const row = {
       room_code: roomCode,
       topic: topic || null,
@@ -32,7 +35,8 @@
       .select("id")
       .single();
     if (error) {
-      console.warn("[db] createLesson failed", error);
+      console.error("[db] createLesson failed", error);
+      window._edunaviLastError = `${error.code || ""} ${error.message || error.details || error}`.trim();
       return null;
     }
     return data.id;
@@ -55,13 +59,20 @@
     if (id) row.id = id;
     if (parentExerciseId) row.parent_exercise_id = parentExerciseId;
     if (displayMode) row.display_mode = displayMode;
-    const { data, error } = await c
+    let { data, error } = await c
       .from("exercises")
       .insert(row)
       .select("id")
       .single();
+    // Auto-retry without display_mode if the column doesn't exist
+    // (migration not yet run). Lets pitch demo work even before migration.
+    if (error && /column.*display_mode|display_mode.*does not exist|schema cache/i.test(`${error.message} ${error.details}`)) {
+      delete row.display_mode;
+      ({ data, error } = await c.from("exercises").insert(row).select("id").single());
+    }
     if (error) {
-      console.warn("[db] logExercise failed", error);
+      console.error("[db] logExercise failed", error);
+      window._edunaviLastError = `${error.code || ""} ${error.message || error.details || error}`.trim();
       return null;
     }
     return data.id;
@@ -137,7 +148,12 @@
       answer,
     };
     if (className) row.class_name = className;
-    const { error } = await c.from("responses").insert(row);
+    let { error } = await c.from("responses").insert(row);
+    // Auto-retry without class_name if column missing
+    if (error && /column.*class_name|class_name.*does not exist|schema cache/i.test(`${error.message} ${error.details}`)) {
+      delete row.class_name;
+      ({ error } = await c.from("responses").insert(row));
+    }
     if (error) console.warn("[db] logResponse failed", error);
   }
 

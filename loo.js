@@ -336,7 +336,8 @@
       targetClasses: state.targetClasses,
     });
     if (!lessonId) {
-      showError("Tunni salvestamine ebaõnnestus. Kas Supabase on seadistatud?");
+      const err = window._edunaviLastError || "tundmatu viga";
+      showError(`Tunni salvestamine ebaõnnestus: ${err}`);
       return;
     }
     state.lessonId = lessonId;
