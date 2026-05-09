@@ -219,6 +219,14 @@
     state.topic = null;
     state.targetClasses = getCheckedClasses();
     const problems = parseDocument($("document").value);
+    if (!state.school) {
+      showError("Vali kool.");
+      return;
+    }
+    if (state.targetClasses.length === 0) {
+      showError("Vali vähemalt üks klass.");
+      return;
+    }
     if (problems.length === 0) {
       showError("Lisa vähemalt üks ülesanne.");
       return;

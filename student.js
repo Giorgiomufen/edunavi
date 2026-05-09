@@ -305,12 +305,18 @@
       });
     }
     if (state.lessonId && state.currentExerciseId) {
-      EduNaviDB.logResponse({
-        lessonId: state.lessonId,
-        exerciseId: state.currentExerciseId,
-        sessionId: state.sessionId,
-        answer,
-        className: state.chosenClass || null,
+      // Blind mode: log the same answer on every teema (lesson-wide vote).
+      const targets = (state.blindTeemaIds && state.blindTeemaIds.length > 0)
+        ? state.blindTeemaIds
+        : [state.currentExerciseId];
+      targets.forEach((exId) => {
+        EduNaviDB.logResponse({
+          lessonId: state.lessonId,
+          exerciseId: exId,
+          sessionId: state.sessionId,
+          answer,
+          className: state.chosenClass || null,
+        });
       });
     }
   }
@@ -448,8 +454,9 @@
     setExercise("");
 
     if (mode === "blind") {
-      // Pime tagasiside: one global vote on the lesson as a whole. Use the
-      // FIRST teema as the target exercise — pragmatic compromise.
+      // Pime tagasiside: lesson-wide vote (FR-13). Apply the same answer to
+      // every teema so the dashboard shows it consistently across all rows.
+      state.blindTeemaIds = bundle.teemad.map((t) => t.id);
       state.currentExerciseId = bundle.teemad[0].id;
       showSingleMode();
       const lbl = $("single-answer-label");
