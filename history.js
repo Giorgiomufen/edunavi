@@ -42,6 +42,66 @@
     });
   }
 
+  function blendCategoryColor(yes, unsure, no, alpha) {
+    const a = alpha === undefined ? 0.85 : alpha;
+    const total = yes + unsure + no;
+    if (total === 0) return `rgba(148, 163, 184, ${a})`;
+    const yp = yes / total, up = unsure / total, np = no / total;
+    const r = Math.round(34 * yp + 250 * up + 239 * np);
+    const g = Math.round(197 * yp + 204 * up + 68 * np);
+    const b = Math.round(94 * yp + 21 * up + 68 * np);
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
+  }
+
+  function perExerciseCounts(exercises, responses) {
+    // Dedupe by (exercise, session) so a switched answer counts once.
+    const dedup = new Map();
+    (responses || []).forEach((r) => {
+      const key = `${r.exercise_id}::${r.session_id || "anon-" + Math.random()}`;
+      dedup.set(key, { exId: r.exercise_id, ans: r.answer });
+    });
+    const counts = {};
+    dedup.forEach(({ exId, ans }) => {
+      if (!counts[exId]) counts[exId] = { yes: 0, unsure: 0, no: 0 };
+      if (counts[exId][ans] !== undefined) counts[exId][ans]++;
+    });
+    return exercises.map((ex) => ({
+      id: ex.id,
+      text: ex.text,
+      ...(counts[ex.id] || { yes: 0, unsure: 0, no: 0 }),
+    }));
+  }
+
+  function drawMiniPolar(canvas, perEx) {
+    if (!canvas || !window.Chart) return;
+    if (perEx.length === 0) return;
+    const labels = perEx.map((_, i) => `${i + 1}`);
+    const data = perEx.map((p) => {
+      const total = p.yes + p.unsure + p.no;
+      if (total === 0) return 8;
+      return Math.max(15, Math.round((p.yes / total) * 100));
+    });
+    const colors = perEx.map((p) => blendCategoryColor(p.yes, p.unsure, p.no, 0.82));
+    new Chart(canvas.getContext("2d"), {
+      type: "polarArea",
+      data: { labels, datasets: [{ data, backgroundColor: colors, borderColor: "#FFFFFF", borderWidth: 1 }] },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        scales: {
+          r: {
+            min: 0, max: 100,
+            ticks: { display: false },
+            grid: { color: "rgba(15, 23, 42, 0.06)" },
+            angleLines: { color: "rgba(15, 23, 42, 0.06)" },
+            pointLabels: { display: false },
+          },
+        },
+      },
+    });
+  }
+
   function renderLessons(rows) {
     if (!rows || rows.length === 0) {
       showOnly("history-empty");
@@ -50,28 +110,40 @@
     const list = $("history-list");
     list.innerHTML = "";
     rows.forEach((row) => {
-      const total = row.responses.length;
-      const yes = row.responses.filter((r) => r.answer === "yes").length;
-      const unsure = row.responses.filter((r) => r.answer === "unsure").length;
-      const no = row.responses.filter((r) => r.answer === "no").length;
+      // Aggregate counts after deduping per (exercise, session)
+      const perEx = perExerciseCounts(row.exercises, row.responses);
+      const yes = perEx.reduce((s, p) => s + p.yes, 0);
+      const unsure = perEx.reduce((s, p) => s + p.unsure, 0);
+      const no = perEx.reduce((s, p) => s + p.no, 0);
+      const total = yes + unsure + no;
       const pct = total > 0 ? Math.round((yes / total) * 100) : null;
+
       const card = document.createElement("article");
       card.className = "history-card";
+      const canvasId = `polar-mini-${row.id}`;
       card.innerHTML = `
-        <div class="history-card-head">
-          <div>
-            <div class="history-room">${row.room_code}</div>
-            <div class="history-when">${fmtDateTime(row.created_at)} · kestus ${fmtDuration(row.created_at, row.ended_at)}</div>
+        <a href="/lesson?id=${encodeURIComponent(row.id)}" class="history-card-link" title="Ava tunni statistika">
+          <div class="history-card-main">
+            <div class="history-card-head">
+              <div>
+                <div class="history-room">${row.room_code}</div>
+                <div class="history-when">${fmtDateTime(row.created_at)} · kestus ${fmtDuration(row.created_at, row.ended_at)}</div>
+              </div>
+              <div class="history-pct">${pct === null ? "—" : pct + "%"}</div>
+            </div>
+            <div class="history-card-grid">
+              <div class="history-stat"><span class="num">${row.exercises.length}</span><span class="label">Ülesandeid</span></div>
+              <div class="history-stat"><span class="num">${total}</span><span class="label">Vastuseid</span></div>
+              <div class="history-stat yes"><span class="num">${yes}</span><span class="label">Sain aru</span></div>
+              <div class="history-stat maybe"><span class="num">${unsure}</span><span class="label">TI aitas</span></div>
+              <div class="history-stat no"><span class="num">${no}</span><span class="label">Jäi kinni</span></div>
+            </div>
           </div>
-          <div class="history-pct">${pct === null ? "—" : pct + "%"}</div>
-        </div>
-        <div class="history-card-grid">
-          <div class="history-stat"><span class="num">${row.exercises.length}</span><span class="label">Ülesandeid</span></div>
-          <div class="history-stat"><span class="num">${total}</span><span class="label">Vastuseid</span></div>
-          <div class="history-stat yes"><span class="num">${yes}</span><span class="label">Sain aru</span></div>
-          <div class="history-stat maybe"><span class="num">${unsure}</span><span class="label">Pole kindel</span></div>
-          <div class="history-stat no"><span class="num">${no}</span><span class="label">Ei saanud</span></div>
-        </div>
+          <div class="history-card-polar">
+            <canvas id="${canvasId}"></canvas>
+            ${total === 0 ? '<div class="history-polar-empty">Pole vastuseid</div>' : ""}
+          </div>
+        </a>
         ${row.exercises.length === 0 ? "" : `
           <details class="history-details">
             <summary>Ülesanded</summary>
@@ -82,6 +154,8 @@
         `}
       `;
       list.appendChild(card);
+      // Defer chart draw so DOM is connected
+      requestAnimationFrame(() => drawMiniPolar(document.getElementById(canvasId), perEx));
     });
     showOnly("history-list");
   }
@@ -130,10 +204,11 @@
       .in("lesson_id", ids)
       .order("posted_at", { ascending: true });
 
-    // 3) responses for those lessons
+    // 3) responses for those lessons (include exercise_id + session_id so we can
+    //    dedupe per (exercise, session) and compute per-exercise breakdowns).
     const { data: responses } = await c
       .from("responses")
-      .select("id, lesson_id, answer")
+      .select("id, lesson_id, exercise_id, session_id, answer")
       .in("lesson_id", ids);
 
     // Group by lesson
