@@ -122,7 +122,11 @@
 
   // ---------- Phase 1 → 2: generate ----------
   function onGenerate() {
-    state.school = $("school").value.trim() || null;
+    const schoolSel = $("school").value;
+    const schoolOther = $("school-other").value.trim();
+    state.school = schoolSel === "__other__"
+      ? (schoolOther || null)
+      : (schoolSel || null);
     state.topic = $("topic").value.trim() || null;
     state.targetClasses = parseClassList($("classes").value);
     const problems = parseDocument($("document").value);
@@ -363,6 +367,10 @@
   document.addEventListener("DOMContentLoaded", () => {
     $("document").addEventListener("input", updateExerciseCount);
     $("generate-btn").addEventListener("click", onGenerate);
+    if ($("school")) $("school").addEventListener("change", (e) => {
+      $("school-other").style.display = e.target.value === "__other__" ? "block" : "none";
+      if (e.target.value === "__other__") $("school-other").focus();
+    });
     if ($("preview-close")) $("preview-close").addEventListener("click", hidePreview);
     if ($("preview-modal")) $("preview-modal").addEventListener("click", (e) => {
       if (e.target.id === "preview-modal") hidePreview();

@@ -2947,3 +2947,18 @@ body.student-body { overflow-y: auto; height: auto; }
 }
 .theme-ok-btn:hover { filter: brightness(1.05); }
 .theme-ok-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* /loo — kool select dropdown */
+.loo-select {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--text);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 15px;
+  width: 100%;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+.loo-select:focus { outline: 2px solid var(--accent, #0369A1); outline-offset: 1px; }

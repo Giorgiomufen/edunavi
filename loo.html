@@ -69,7 +69,14 @@
         <div class="loo-grid">
           <div class="loo-block">
             <span class="eyebrow">Kool & teema</span>
-            <input type="text" id="school" placeholder="Kool (nt Tallinna 21. Kool)" autocomplete="organization" />
+            <select id="school" class="loo-select">
+              <option value="">Vali kool…</option>
+              <option value="Tallinna Reaalkool">Tallinna Reaalkool</option>
+              <option value="Tallinna 21. Kool">Tallinna 21. Kool</option>
+              <option value="Hugo Treffneri Gümnaasium">Hugo Treffneri Gümnaasium</option>
+              <option value="__other__">Muu kool…</option>
+            </select>
+            <input type="text" id="school-other" placeholder="Sisesta kooli nimi" style="display:none;" autocomplete="organization" />
             <input type="text" id="topic" placeholder="Teema (nt murdude põhitehted)" autocomplete="off" />
           </div>
 
