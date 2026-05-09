@@ -156,7 +156,7 @@
     state.school = schoolSel === "__other__"
       ? (schoolOther || null)
       : (schoolSel || null);
-    state.topic = $("topic").value.trim() || null;
+    state.topic = null;
     state.targetClasses = getCheckedClasses();
     const problems = parseDocument($("document").value);
     if (problems.length === 0) {
