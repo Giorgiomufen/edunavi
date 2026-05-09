@@ -87,25 +87,47 @@
     return (s || "").split(/[,;\n]/).map((x) => x.trim()).filter(Boolean);
   }
 
-  // Build the class checkbox grid: 8.A — 12.C
-  function buildClassesGrid() {
+  // Per-school class catalog. Real values for the elite schools we list;
+  // generic 8.A–12.C fallback for "Muu kool".
+  const SCHOOL_CLASSES = {
+    "Tallinna Reaalkool": [
+      "10.A", "10.B", "10.C", "10.D",
+      "11.A", "11.B", "11.C", "11.D",
+      "12.A", "12.B", "12.C", "12.D",
+    ],
+    "Tallinna 21. Kool": [
+      "10.HUM", "10.LOM", "10.MAT", "10.REA",
+      "11.HUM", "11.LOM", "11.MAT", "11.REA",
+      "12.HUM", "12.LOM", "12.MAT", "12.REA",
+    ],
+    "Hugo Treffneri Gümnaasium": [
+      "10.A", "10.B", "10.C", "10.D", "10.E",
+      "11.A", "11.B", "11.C", "11.D", "11.E",
+      "12.A", "12.B", "12.C", "12.D", "12.E",
+    ],
+    __default__: [
+      "8.A", "8.B", "8.C",
+      "9.A", "9.B", "9.C",
+      "10.A", "10.B", "10.C",
+      "11.A", "11.B", "11.C",
+      "12.A", "12.B", "12.C",
+    ],
+  };
+
+  function buildClassesGrid(schoolKey) {
     const grid = $("classes-grid");
-    if (!grid || grid.dataset.built) return;
-    const grades = [8, 9, 10, 11, 12];
-    const letters = ["A", "B", "C"];
-    const html = grades.map((g) => `
-      <div class="classes-row">
-        ${letters.map((L) => {
-          const v = `${g}.${L}`;
-          return `<label class="class-check">
-            <input type="checkbox" value="${v}" />
-            <span>${v}</span>
-          </label>`;
-        }).join("")}
-      </div>
+    if (!grid) return;
+    if (!schoolKey) {
+      grid.innerHTML = `<div class="classes-empty">Vali kool, et näha klasse.</div>`;
+      return;
+    }
+    const list = SCHOOL_CLASSES[schoolKey] || SCHOOL_CLASSES.__default__;
+    grid.innerHTML = list.map((v) => `
+      <label class="class-check">
+        <input type="checkbox" value="${v}" />
+        <span>${v}</span>
+      </label>
     `).join("");
-    grid.innerHTML = html;
-    grid.dataset.built = "1";
   }
 
   function getCheckedClasses() {
@@ -394,12 +416,15 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    buildClassesGrid();
+    buildClassesGrid(null);
     $("document").addEventListener("input", updateExerciseCount);
     $("generate-btn").addEventListener("click", onGenerate);
     if ($("school")) $("school").addEventListener("change", (e) => {
-      $("school-other").style.display = e.target.value === "__other__" ? "block" : "none";
-      if (e.target.value === "__other__") $("school-other").focus();
+      const v = e.target.value;
+      $("school-other").style.display = v === "__other__" ? "block" : "none";
+      if (v === "__other__") $("school-other").focus();
+      // Rebuild classes per school. "Muu kool" → use default fallback grid.
+      buildClassesGrid(v === "__other__" ? "__default__" : (v || null));
     });
     if ($("preview-close")) $("preview-close").addEventListener("click", hidePreview);
     if ($("preview-modal")) $("preview-modal").addEventListener("click", (e) => {
