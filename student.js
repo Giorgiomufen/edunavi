@@ -275,11 +275,9 @@
   }
 
   function enableButtons(enabled) {
-    document.querySelectorAll(".student-buttons button").forEach((b) => {
-      b.disabled = !enabled;
-    });
-    // Step-mode buttons too (?ex= flow) — block answers until class is picked
-    document.querySelectorAll(".student-step-buttons button").forEach((b) => {
+    document.querySelectorAll(
+      ".student-buttons button, .student-step-buttons button, .theme-pick-btn, .theme-ok-btn"
+    ).forEach((b) => {
       b.disabled = !enabled;
     });
   }
