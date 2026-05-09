@@ -58,31 +58,56 @@
     const c = client();
     if (!c) return showEmpty();
 
-    const { data: lesson, error: lessonErr } = await c
+    let lessonResp = await c
       .from("lessons")
       .select("id, room_code, topic, school, class_name, target_classes, created_at, ended_at")
       .eq("id", lessonId)
       .maybeSingle();
-    if (lessonErr || !lesson) return showEmpty();
+    if (lessonResp.error && /target_classes/i.test(`${lessonResp.error.message} ${lessonResp.error.details}`)) {
+      lessonResp = await c
+        .from("lessons")
+        .select("id, room_code, topic, school, class_name, created_at, ended_at")
+        .eq("id", lessonId)
+        .maybeSingle();
+    }
+    if (lessonResp.error || !lessonResp.data) return showEmpty();
+    const lesson = lessonResp.data;
 
-    const { data: exercises } = await c
+    let exResp = await c
       .from("exercises")
       .select("id, text, parent_exercise_id, posted_at")
       .eq("lesson_id", lessonId)
       .order("posted_at", { ascending: true });
+    if (exResp.error && /parent_exercise_id/i.test(`${exResp.error.message} ${exResp.error.details}`)) {
+      exResp = await c
+        .from("exercises")
+        .select("id, text, posted_at")
+        .eq("lesson_id", lessonId)
+        .order("posted_at", { ascending: true });
+    }
+    const exercises = exResp.data || [];
 
-    const { data: responses } = await c
+    let respResp = await c
       .from("responses")
       .select("exercise_id, answer, session_id, class_name")
       .eq("lesson_id", lessonId);
+    if (respResp.error && /class_name/i.test(`${respResp.error.message} ${respResp.error.details}`)) {
+      respResp = await c
+        .from("responses")
+        .select("exercise_id, answer, session_id")
+        .eq("lesson_id", lessonId);
+    }
+    const responses = respResp.data || [];
 
-    const { data: comments } = await c
+    let commentsResp = await c
       .from("comments")
       .select("exercise_id, class_name, text, created_at")
       .eq("lesson_id", lessonId)
       .order("created_at", { ascending: false });
+    // comments table may not exist yet — silently skip
+    const comments = commentsResp.error ? [] : (commentsResp.data || []);
 
-    render(lesson, exercises || [], responses || [], lessonId, comments || []);
+    render(lesson, exercises, responses, lessonId, comments);
   }
 
   function showEmpty() {

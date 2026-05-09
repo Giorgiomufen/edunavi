@@ -88,27 +88,46 @@
     return logExercise(args);
   }
 
-  // For the lesson-level student QR (new flow): load lesson + its teemad
-  // (all exercises in this lesson, treated as a flat list).
+  // For the lesson-level student QR (new flow): load lesson + its teemad.
+  // Defensive: retries with fewer columns if optional ones are missing.
   async function findLessonTeemad(lessonId) {
     const c = client();
     if (!c || !lessonId) return null;
-    const { data: lesson, error: lErr } = await c
+    let lessonResp = await c
       .from("lessons")
       .select("id, room_code, topic, school, target_classes")
       .eq("id", lessonId)
       .maybeSingle();
-    if (lErr || !lesson) {
-      if (lErr) console.warn("[db] findLessonTeemad lesson failed", lErr);
+    if (lessonResp.error && /target_classes/i.test(`${lessonResp.error.message} ${lessonResp.error.details}`)) {
+      lessonResp = await c
+        .from("lessons")
+        .select("id, room_code, topic, school")
+        .eq("id", lessonId)
+        .maybeSingle();
+    }
+    if (lessonResp.error || !lessonResp.data) {
+      console.warn("[db] findLessonTeemad lesson failed", lessonResp.error);
+      window._edunaviLastError = lessonResp.error
+        ? `${lessonResp.error.code || ""} ${lessonResp.error.message || ""}`.trim()
+        : "lesson row missing";
       return null;
     }
-    const { data: teemad, error: tErr } = await c
+    const lesson = lessonResp.data;
+
+    let teemadResp = await c
       .from("exercises")
       .select("id, text, posted_at, display_mode")
       .eq("lesson_id", lessonId)
       .order("posted_at", { ascending: true });
-    if (tErr) console.warn("[db] findLessonTeemad teemad failed", tErr);
-    return { lesson, teemad: teemad || [] };
+    if (teemadResp.error && /display_mode/i.test(`${teemadResp.error.message} ${teemadResp.error.details}`)) {
+      teemadResp = await c
+        .from("exercises")
+        .select("id, text, posted_at")
+        .eq("lesson_id", lessonId)
+        .order("posted_at", { ascending: true });
+    }
+    if (teemadResp.error) console.warn("[db] findLessonTeemad teemad failed", teemadResp.error);
+    return { lesson, teemad: teemadResp.data || [] };
   }
 
   // Legacy per-exercise QR (old flow): load one parent exercise + its child
