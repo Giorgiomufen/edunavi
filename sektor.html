@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="et">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EduNavi — sektorgraafik</title>
+    <meta name="description" content="EduNavi sektorgraafik — 6 klassi × 3 etappi, igas ringis ühe etapi tulemus." />
+    <meta name="theme-color" content="#000000" />
+    <link rel="canonical" href="https://edunavi.vercel.app/sektor" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Ctext x='50%25' y='62%25' font-family='Arial' font-size='18' font-weight='700' fill='white' text-anchor='middle'%3EE%3C/text%3E%3C/svg%3E" />
+  </head>
+  <body class="sektor-body">
+    <header class="class-header">
+      <a href="/" class="wordmark" style="border:0; color:var(--text);" title="Tagasi avalehele">EduNavi <small>Sektorgraafik</small></a>
+      <div class="class-meta-bar">
+        <span class="mono">Tallinna 21. Kool</span>
+        <span class="mono">Ülesanne: Murdude põhitehted</span>
+        <span class="mono"><span id="totals-label">— õpilast</span></span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button id="reload-btn" class="ghost-button" title="Genereeri uued näidisandmed">Uus näidis</button>
+      </div>
+    </header>
+
+    <main class="class-main">
+      <section class="recommendation">
+        <span class="eyebrow">Sektorgraafik</span>
+        <h1 class="rec-headline">Üks ülesanne · 3 etappi · 6 klassi</h1>
+        <p class="rec-detail">Iga sektor on üks klass. Iga rõngas on üks etapp ülesandest. Värv näitab, kui suur osa klassist sai aru — roheline = sai aru, punane = jäi kinni.</p>
+      </section>
+
+      <section class="sektor-frame">
+        <div class="sektor-svg-wrap">
+          <svg id="sektor-svg" viewBox="-200 -200 400 400" aria-label="Klassi mõistmise sektorgraafik"></svg>
+        </div>
+        <aside class="sektor-legend">
+          <div class="legend-block">
+            <span class="legend-title">Klassid</span>
+            <ul id="legend-classes" class="legend-list"></ul>
+          </div>
+          <div class="legend-block">
+            <span class="legend-title">Etapid (rõngad)</span>
+            <ul id="legend-topics" class="legend-list legend-topics"></ul>
+          </div>
+          <div class="legend-block">
+            <span class="legend-title">Värvid</span>
+            <ul class="legend-list">
+              <li><span class="swatch" style="background:#22C55E;"></span>≥ 80% sai aru</li>
+              <li><span class="swatch" style="background:#FACC15;"></span>50–79%</li>
+              <li><span class="swatch" style="background:#F97316;"></span>30–49%</li>
+              <li><span class="swatch" style="background:#EF4444;"></span>&lt; 30% sai aru</li>
+            </ul>
+          </div>
+        </aside>
+      </section>
+
+      <section>
+        <span class="eyebrow">Andmed</span>
+        <div class="sektor-table-wrap">
+          <table class="sektor-table" id="sektor-table"></table>
+        </div>
+      </section>
+    </main>
+
+    <script src="sektor.js"></script>
+  </body>
+</html>
