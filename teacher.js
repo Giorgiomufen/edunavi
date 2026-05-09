@@ -677,52 +677,14 @@
     hideStepsReview();
     $("exercise-input").value = "";
 
-    // Each student paces themselves through 300 students at once.
-    // Post the whole step set as a single broadcast — students see all steps and mark per step.
-    const stepSetId = EduNavi.newExerciseId();
-    const stepObjects = steps.map((stepText, i) => ({
-      id: EduNavi.newExerciseId(),
-      text: `${i + 1}. samm — ${stepText}`,
-      stepSetId,
-      stepIndex: i,
-      stepCount: steps.length,
-      ts: Date.now(),
-    }));
-
-    // Track these in teacher state so the chart aggregates correctly per step.
-    state.currentStepSet = { id: stepSetId, steps: stepObjects };
-    // No single "current" exercise in step-set mode — students vote per step independently.
-    state.currentExerciseId = null;
-    state.stats.exercises += stepObjects.length;
-    state.respondedSessions = new Set();
-    stepObjects.forEach((ex) => trackExercise(ex.id, ex.text));
-    updatePolarChart();
-
-    setCurrentExercise(`${stepObjects.length} etapi jada · iga õpilane töötab oma tempos · vaata kuumakaarti`);
-    resetCounts();
-    updateStats();
-    updateResponseRate();
-
-    // Broadcast as a single step_set event AND each as an exercise (for back-compat).
-    if (state.channel) {
-      try {
-        if (state.channel.sendStepSet) {
-          state.channel.sendStepSet({ stepSetId, steps: stepObjects, ts: Date.now() });
-        }
-      } catch (e) { console.warn("step_set broadcast failed", e); }
-      // Also broadcast each as exercise — proven path; ensures students see something even if step_set fails.
-      stepObjects.forEach((ex) => {
-        try { state.channel.sendExercise(ex); } catch (e) { console.warn("exercise broadcast failed", e); }
-      });
-      try {
-        state.channel.updatePresence({ currentStepSet: { id: stepSetId, steps: stepObjects } });
-      } catch (e) { console.warn("presence update failed", e); }
-    }
-    if (state.lessonId) {
-      stepObjects.forEach((ex) => {
-        EduNaviDB.logExercise({ lessonId: state.lessonId, id: ex.id, text: ex.text });
-      });
-    }
+    // Simplified, reliable path: post each step as a regular exercise via the
+    // SAME wrapper that single posts use. Each step replaces the previous on
+    // the student side. We use the existing step-nav UI for manual pacing.
+    const lines = steps;
+    state.queuedSteps = lines;
+    state.queuedIndex = 0;
+    postQueuedStep();
+    showStepNav();
   }
 
   function postQueuedStep() {
