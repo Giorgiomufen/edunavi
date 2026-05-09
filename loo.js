@@ -29,13 +29,16 @@
   function proposeStepsFor(text) {
     const t = (text || "").toLowerCase().replace(/\s+/g, " ").trim();
 
-    // Lineaarvõrrand
-    if (/(\d+)\s*x\s*([+\-−])\s*(\d+)\s*=\s*(-?\d+)/.test(t) || /lineaar/.test(t)) {
+    // Funktsiooni uurimine (check before ruutvõrrand — "f(x) = x²..." would
+    // match both, but if "funktsioon" / "uurimine" / "tuletis" is mentioned,
+    // it's a function analysis problem)
+    if (/funktsioon|uurimine|tuletis/.test(t) || /f\s*\(\s*x\s*\).*uurimine/.test(t)) {
       return [
-        "Võrrandi teisendamine",
-        "Liikmete koondamine",
-        "Muutuja avaldamine",
-        "Lahendi kontroll",
+        "Funktsiooni nullkohad",
+        "Tuletise leidmine",
+        "Märgitabel",
+        "Kasvamise ja kahanemise vahemikud",
+        "Ekstreemumid",
       ];
     }
     // Ruutvõrrand
@@ -48,14 +51,22 @@
         "Lahendite kontroll",
       ];
     }
-    // Funktsiooni uurimine
-    if (/f\s*\(\s*x\s*\)/.test(t) || /funktsioon/.test(t) || /tuletis/.test(t)) {
+    // Lineaarvõrrand
+    if (/(\d+)\s*x\s*([+\-−])\s*(\d+)\s*=\s*(-?\d+)/.test(t) || /lineaar/.test(t)) {
       return [
-        "Funktsiooni nullkohad",
-        "Tuletise leidmine",
-        "Märgitabel",
-        "Kasvamise ja kahanemise vahemikud",
-        "Ekstreemumid",
+        "Võrrandi teisendamine",
+        "Liikmete koondamine",
+        "Muutuja avaldamine",
+        "Lahendi kontroll",
+      ];
+    }
+    // Funktsioon ilma uurimata (lihtsalt f(x) = ...)
+    if (/f\s*\(\s*x\s*\)/.test(t)) {
+      return [
+        "Funktsiooni väärtused",
+        "Asendamine",
+        "Arvutamine",
+        "Vastuse kontroll",
       ];
     }
     // Murrud
