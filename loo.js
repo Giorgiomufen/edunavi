@@ -131,11 +131,8 @@
   }
 
   function getCheckedClasses() {
-    const checked = [...document.querySelectorAll('#classes-grid input[type="checkbox"]:checked')]
+    return [...document.querySelectorAll('#classes-grid input[type="checkbox"]:checked')]
       .map((c) => c.value);
-    const custom = parseClassList($("classes-other") ? $("classes-other").value : "");
-    // de-dupe
-    return [...new Set([...checked, ...custom])];
   }
   function parseDocument(s) {
     return (s || "")
