@@ -109,6 +109,11 @@
     const room = (u.searchParams.get("room") || "").toUpperCase().trim();
     return /^[A-Z]{4}$/.test(room) ? room : null;
   }
+  function getExerciseFromUrl() {
+    const u = new URL(window.location.href);
+    const ex = (u.searchParams.get("ex") || "").trim();
+    return /^[0-9a-f-]{8,}$/i.test(ex) ? ex : null;
+  }
 
   function setConnection(status) {
     const pill = $("conn-pill");
@@ -207,8 +212,51 @@
         exerciseId,
         sessionId: state.sessionId,
         answer,
+        className: state.chosenClass || null,
       });
     }
+  }
+
+  // FR-13 — Teema-režiim: ainult etapinimed kuvatud, üks ühik valik
+  // ("kus jäid kinni?"). Klikiga märgib selle etapi 'no' või 'unsure'.
+  function renderThemeMode(parentId, steps) {
+    const single = $("single-exercise-box");
+    const lbl = $("single-answer-label");
+    const sb = $("single-buttons");
+    if (single) single.style.display = "";
+    if (lbl) {
+      lbl.style.display = "";
+      lbl.textContent = "Kui jäid kinni, märgi mille juures:";
+    }
+    if (sb) sb.style.display = "none";
+    const stepsContainer = $("steps-container");
+    stepsContainer.style.display = "block";
+    const list = $("student-steps-list");
+    list.innerHTML = "";
+    steps.forEach((step) => {
+      const li = document.createElement("li");
+      li.className = "student-step student-theme-row";
+      li.dataset.stepId = step.id;
+      li.innerHTML = `
+        <button class="theme-pick-btn" data-answer="no">${escapeHtml(step.text)}</button>
+      `;
+      li.querySelector("button").addEventListener("click", () => answerStep(step.id, "no", li));
+      list.appendChild(li);
+    });
+    // Lisa "Sain hakkama kõigega" üldine nupp
+    const okLi = document.createElement("li");
+    okLi.className = "student-step student-theme-ok";
+    okLi.innerHTML = `<button class="theme-ok-btn">Sain hakkama kõigega</button>`;
+    okLi.querySelector("button").addEventListener("click", () => {
+      // Märgi 'yes' iga etapile (tähendab: said hakkama)
+      steps.forEach((step) => {
+        const dummyLi = document.createElement("li");
+        answerStep(step.id, "yes", dummyLi);
+      });
+      setStatus("Aitäh — märgitud kõik kui hakkama saanud.", true);
+      list.querySelectorAll("button").forEach((b) => { b.disabled = true; });
+    });
+    list.appendChild(okLi);
   }
 
   function applyStepSet(set) {
@@ -223,6 +271,10 @@
 
   function enableButtons(enabled) {
     document.querySelectorAll(".student-buttons button").forEach((b) => {
+      b.disabled = !enabled;
+    });
+    // Step-mode buttons too (?ex= flow) — block answers until class is picked
+    document.querySelectorAll(".student-step-buttons button").forEach((b) => {
       b.disabled = !enabled;
     });
   }
@@ -253,6 +305,7 @@
         exerciseId: state.currentExerciseId,
         sessionId: state.sessionId,
         answer,
+        className: state.chosenClass || null,
       });
     }
   }
@@ -337,6 +390,77 @@
     });
   }
 
+  // Per-exercise QR mode: /student?ex=<exerciseId>
+  // No realtime channel — load problem + steps from DB, render as a step set,
+  // log responses directly to Supabase. Teacher reviews async at /lesson?id=...
+  async function joinByExercise(exerciseId) {
+    state.sessionId = EduNaviDB && EduNaviDB.getOrCreateSessionId
+      ? EduNaviDB.getOrCreateSessionId()
+      : null;
+    $("join-screen").style.display = "none";
+    $("lesson-view").style.display = "block";
+
+    if (!EduNavi.isConfigured) {
+      EduNavi.showConfigBanner();
+      setConnection("DEMO_MODE");
+      setExercise("Demo režiim — Supabase pole seadistatud.");
+      return;
+    }
+
+    const bundle = await EduNaviDB.findExerciseWithSteps(exerciseId);
+    if (!bundle || !bundle.parent) {
+      setExercise("Ülesannet ei leitud. Palu õpetajalt uut linki.");
+      setConnection("CHANNEL_ERROR");
+      return;
+    }
+
+    state.lessonId = bundle.parent.lesson_id;
+    state.roomCode = bundle.lesson ? bundle.lesson.room_code : null;
+    state.currentExerciseId = bundle.parent.id;
+
+    const roomLabel = $("room-label");
+    if (roomLabel) {
+      const topic = bundle.lesson && bundle.lesson.topic;
+      roomLabel.textContent = topic ? topic : "Ülesanne";
+    }
+
+    if (state.lessonId && state.sessionId) {
+      EduNaviDB.logPresence({
+        lessonId: state.lessonId,
+        sessionId: state.sessionId,
+        action: "join",
+      });
+    }
+
+    // Render the parent problem text.
+    setExercise(bundle.parent.text);
+
+    // FR-13/14 — branch on display_mode set by the teacher in /loo
+    const mode = bundle.parent.display_mode || "full";
+
+    if (mode === "blind" || !bundle.steps || bundle.steps.length === 0) {
+      // Pime tagasiside — õpilane ei näe etappe ette. Üks valik kogu ülesande kohta.
+      showSingleMode();
+      enableButtons(true);
+    } else if (mode === "theme") {
+      // Teema-režiim — õpilane näeb teema/etapi nimesid, valib kus jäi kinni.
+      renderThemeMode(bundle.parent.id, bundle.steps);
+    } else {
+      // Täisrežiim — senine käitumine.
+      applyStepSet({
+        id: bundle.parent.id,
+        steps: bundle.steps.map((s) => ({ id: s.id, text: s.text })),
+      });
+    }
+
+    // Class picker if lesson has target_classes
+    if (bundle.lesson && Array.isArray(bundle.lesson.target_classes) && bundle.lesson.target_classes.length > 0) {
+      renderClassPicker(bundle.lesson.target_classes);
+    }
+
+    setConnection("SUBSCRIBED");
+  }
+
   function showJoinScreen() {
     $("join-screen").style.display = "grid";
     $("lesson-view").style.display = "none";
@@ -377,19 +501,35 @@
     if (commentBtn) commentBtn.addEventListener("click", () => {
       const ta = document.getElementById("comment-input");
       const text = ta.value.trim();
-      if (!text || !state.channel) return;
-      state.channel.sendComment({
-        text,
-        sessionId: state.sessionId,
-        exerciseId: state.currentExerciseId,
-        ts: Date.now(),
-      });
+      if (!text) return;
+      // Realtime room mode (legacy) — still broadcast on channel
+      if (state.channel && state.channel.sendComment) {
+        state.channel.sendComment({
+          text,
+          sessionId: state.sessionId,
+          exerciseId: state.currentExerciseId,
+          ts: Date.now(),
+        });
+      }
+      // FR-22 / FR-27 — persist to comments table for the dashboard
+      if (state.lessonId && EduNaviDB && EduNaviDB.logComment) {
+        EduNaviDB.logComment({
+          lessonId: state.lessonId,
+          exerciseId: state.currentExerciseId || null,
+          sessionId: state.sessionId,
+          text,
+          className: state.chosenClass || null,
+        });
+      }
       ta.value = "";
       setStatus("Kommentaar saadetud", true);
     });
 
+    const exerciseId = getExerciseFromUrl();
     const room = getRoomFromUrl();
-    if (room) {
+    if (exerciseId) {
+      joinByExercise(exerciseId);
+    } else if (room) {
       joinRoom(room);
     } else {
       showJoinScreen();

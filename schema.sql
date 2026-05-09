@@ -29,6 +29,10 @@ create table if not exists public.exercises (
   posted_at   timestamptz not null default now()
 );
 create index if not exists exercises_lesson_idx on public.exercises (lesson_id, posted_at);
+-- Hierarchy: problem-level exercises have parent_exercise_id IS NULL,
+-- step-level exercises reference their parent problem.
+alter table public.exercises add column if not exists parent_exercise_id uuid references public.exercises(id) on delete cascade;
+create index if not exists exercises_parent_idx on public.exercises (parent_exercise_id);
 
 -- RESPONSES — anonymous student responses
 create table if not exists public.responses (
@@ -41,6 +45,34 @@ create table if not exists public.responses (
 );
 create index if not exists responses_exercise_idx on public.responses (exercise_id);
 create index if not exists responses_lesson_idx   on public.responses (lesson_id, created_at);
+-- Per-class breakdown (FR-32)
+alter table public.responses add column if not exists class_name text;
+create index if not exists responses_class_idx on public.responses (lesson_id, class_name);
+
+-- Display mode per parent exercise (FR-13 / FR-14)
+-- 'full'  = Täisrežiim (etapid nähtavad)
+-- 'theme' = Teema-režiim (ainult teemad/etappide nimed)
+-- 'blind' = Pime tagasiside (õpilane ei näe etappe ette)
+alter table public.exercises add column if not exists display_mode text default 'full'
+  check (display_mode in ('full','theme','blind'));
+
+-- COMMENTS — vabatahtlikud anonüümsed õpilase kommentaarid (FR-22, FR-27)
+create table if not exists public.comments (
+  id           uuid primary key default gen_random_uuid(),
+  lesson_id    uuid not null references public.lessons(id) on delete cascade,
+  exercise_id  uuid references public.exercises(id) on delete cascade,
+  session_id   text,
+  class_name   text,
+  text         text not null,
+  created_at   timestamptz not null default now()
+);
+create index if not exists comments_lesson_idx on public.comments (lesson_id, created_at);
+create index if not exists comments_exercise_idx on public.comments (exercise_id);
+
+alter table public.comments enable row level security;
+drop policy if exists comments_all on public.comments;
+create policy comments_all on public.comments
+  for all using (true) with check (true);
 
 -- PRESENCE_EVENTS — student joins / leaves
 create table if not exists public.presence_events (

@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="et">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EduNavi — Loo tund</title>
+    <meta name="description" content="EduNavi — loo tund: pane klassid, lisa ülesanded, AI pakub etapid, sina kinnitad, tekib QR." />
+    <meta name="theme-color" content="#000000" />
+    <link rel="canonical" href="https://edunavi.vercel.app/loo" />
+    <meta name="robots" content="noindex" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Ctext x='50%25' y='62%25' font-family='Arial' font-size='18' font-weight='700' fill='white' text-anchor='middle'%3EE%3C/text%3E%3C/svg%3E" />
+  </head>
+  <body class="loo-body">
+    <!-- Top-right auth corner -->
+    <div id="top-auth" class="top-auth">
+      <span id="top-auth-loading" style="color:var(--muted-2); font-size:11px; letter-spacing:0.25em; text-transform:uppercase;">kontroll</span>
+      <button id="open-signin" class="link-button" style="display:none;">Logi sisse</button>
+      <span id="top-auth-user" style="display:none; align-items:center; gap:14px;">
+        <a href="/history" class="link-button" style="font-size:12px;">Minu tunnid</a>
+        <span id="user-email" class="mono" style="font-size:12px; color:var(--muted);"></span>
+        <button id="signout-btn" style="font-size:10px; padding:6px 12px;">Logi välja</button>
+      </span>
+    </div>
+
+    <header class="class-header">
+      <a href="/" class="wordmark" style="border:0; color:var(--text);" title="Tagasi avalehele">EduNavi <small>Loo tund</small></a>
+      <div class="class-meta-bar">
+        <span id="loo-step-indicator" class="mono">1 / 4 · andmed</span>
+      </div>
+      <a href="/history" class="ghost-button" style="text-decoration:none; padding:10px 18px;">Minu tunnid</a>
+    </header>
+
+    <!-- Login modal -->
+    <div id="auth-modal" class="modal-overlay">
+      <form class="modal-content auth-card" id="auth-form" autocomplete="on">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <h2 class="display" style="font-size:24px; margin:0;" id="auth-mode-title">Logi sisse</h2>
+          <button type="button" id="auth-close" style="padding:6px 10px; font-size:11px;">×</button>
+        </div>
+        <p class="auth-tagline" id="auth-mode-sub">Tunnid salvestuvad sinu kontole.</p>
+        <div class="form-field">
+          <label class="form-label" for="email-input">Email</label>
+          <input type="email" id="email-input" placeholder="email@kool.ee" autocomplete="email" required />
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="password-input">Parool</label>
+          <input type="password" id="password-input" placeholder="vähemalt 6 tähemärki" autocomplete="current-password" required />
+        </div>
+        <div class="auth-error" id="auth-error"></div>
+        <button type="submit" class="primary signin-button" id="auth-submit">Logi sisse</button>
+        <p class="form-toggle">
+          <span id="auth-toggle-text">Pole kontot?</span>
+          <button type="button" id="auth-toggle" class="link-button">Loo konto</button>
+        </p>
+      </form>
+    </div>
+
+    <main class="class-main">
+
+      <!-- Phase 1: pick classes + paste document -->
+      <section id="phase-input" class="loo-phase">
+        <div class="recommendation">
+          <span class="eyebrow">1. Tunni andmed</span>
+          <h1 class="rec-headline">Pane klassid ja ülesanded</h1>
+          <p class="rec-detail">Vali klassid, mis tunnis osalevad. Lisa ülesanded — kleebi tekst või kirjuta käsitsi. Iga ülesanne uuele real, tühjad read eraldavad ülesanded.</p>
+        </div>
+
+        <div class="loo-grid">
+          <div class="loo-block">
+            <span class="eyebrow">Kool & teema</span>
+            <input type="text" id="school" placeholder="Kool (nt Tallinna 21. Kool)" autocomplete="organization" />
+            <input type="text" id="topic" placeholder="Teema (nt murdude põhitehted)" autocomplete="off" />
+          </div>
+
+          <div class="loo-block">
+            <span class="eyebrow">Klassid</span>
+            <input type="text" id="classes" placeholder="8.A, 8.B, 8.C" autocomplete="off" />
+            <p class="loo-hint">Komaga eraldatud. Õpilane valib oma klassi liitumisel.</p>
+          </div>
+        </div>
+
+        <div class="loo-block loo-doc">
+          <div style="display:flex; justify-content:space-between; align-items:baseline;">
+            <span class="eyebrow">Ülesanded</span>
+            <span id="loo-exercise-count" class="mono" style="font-size:11px; color:var(--muted);">0 ülesannet</span>
+          </div>
+          <textarea id="document" placeholder="Lahenda 7x − 5 = 16
+
+Funktsiooni f(x) = x² − 6x + 8 uurimine
+
+Liida murrud 2/3 + 1/4
+
+(Iga ülesanne tühja reaga eraldatud)" rows="10"></textarea>
+          <div class="loo-actions">
+            <button class="primary" id="generate-btn">Genereeri etapid AI-ga →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Phase 2: review AI-generated steps -->
+      <section id="phase-review" class="loo-phase" style="display:none;">
+        <div class="recommendation">
+          <span class="eyebrow">2. Vaata etapid üle</span>
+          <h1 class="rec-headline">AI pakkus etapid · sina kinnitad</h1>
+          <p class="rec-detail">Iga ülesande juures on AI pakutud etapid. Muuda teksti, lisa või eemalda etappe. Kui valmis, kinnita all.</p>
+        </div>
+
+        <div id="problems-list" class="loo-problems"></div>
+
+        <div class="loo-actions" style="justify-content:space-between;">
+          <button id="back-to-input">← Tagasi muutma</button>
+          <button class="primary" id="confirm-btn">Kinnita ja loo QR-koodid →</button>
+        </div>
+      </section>
+
+      <!-- Õpilasevaate eelvaade modaal (FR-15) -->
+      <div id="preview-modal" class="modal-overlay">
+        <div class="modal-content preview-modal-content">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <span class="eyebrow" style="margin:0;">Eelvaade · õpilase vaade</span>
+            <button type="button" id="preview-close" style="padding:6px 10px; font-size:11px;">×</button>
+          </div>
+          <p style="font-size:11px; color:var(--muted); margin:0 0 14px;">
+            Nii näeb õpilane seda ülesannet QR-koodi kaudu.
+          </p>
+          <div id="preview-body" class="preview-body"></div>
+        </div>
+      </div>
+
+      <!-- Phase 3: done — show QRs -->
+      <section id="phase-done" class="loo-phase" style="display:none;">
+        <div class="recommendation">
+          <span class="eyebrow">3. Tund loodud · QR-koodid valmis</span>
+          <h1 class="rec-headline">Tund on valmis. Jaga QR-koode õpilastega.</h1>
+          <p class="rec-detail">Iga ülesande all on tema oma QR-kood. Kleebi see Stuudiumi, töölehele või kuhugi mujale, kus õpilased ülesandeid lahendavad. Igaüks saab oma tempos vastata.</p>
+        </div>
+
+        <div id="qr-grid" class="loo-qr-grid"></div>
+
+        <div class="loo-actions" style="justify-content:space-between;">
+          <a id="open-dashboard-link" href="#" class="btn-link" style="padding:14px 22px; border:1px solid var(--brand-teacher, #1E3A5F); background:var(--brand-teacher, #1E3A5F); color:#fff; text-decoration:none; font-family:'Barlow Condensed', sans-serif; font-weight:600; font-size:12px; letter-spacing:0.22em; text-transform:uppercase;">Ava õpetaja koondvaade →</a>
+          <button id="new-lesson-btn">Loo veel üks tund</button>
+        </div>
+      </section>
+
+      <div id="loo-error" class="loo-error" style="display:none;"></div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+    <script src="config.js"></script>
+    <script src="shared.js"></script>
+    <script src="db.js"></script>
+    <script src="auth.js"></script>
+    <script src="auth-ui.js"></script>
+    <script src="loo.js"></script>
+  </body>
+</html>

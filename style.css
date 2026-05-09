@@ -2228,3 +2228,722 @@ body.student-body { overflow-y: auto; height: auto; }
 }
 .join-card .join-input:focus { border-bottom-color: var(--text) !important; }
 .join-card button { margin-top: 24px; }
+
+/* ===========================
+   /loo — Teacher prep flow
+   =========================== */
+.loo-body { background: var(--color-surface-page); color: var(--text); }
+.loo-body .class-main { max-width: 1180px; margin: 0 auto; padding: 32px 24px 80px; }
+.loo-phase { display: block; }
+.loo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin: 24px 0;
+}
+@media (max-width: 720px) { .loo-grid { grid-template-columns: 1fr; } }
+.loo-block {
+  background: var(--color-surface-card, #ffffff);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.loo-block input[type="text"],
+.loo-block textarea {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--text);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 15px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.loo-block textarea {
+  resize: vertical;
+  min-height: 200px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.loo-block input:focus,
+.loo-block textarea:focus { outline: 2px solid var(--accent, #0369A1); outline-offset: 1px; }
+.loo-doc { margin-top: 8px; }
+.loo-hint { color: var(--muted); font-size: 12px; margin: 0; }
+.loo-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+.loo-actions button {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 14px 22px;
+  border-radius: 10px;
+  border: 1px solid var(--line-strong);
+  background: #ffffff;
+  color: var(--text);
+  cursor: pointer;
+}
+.loo-actions button.primary {
+  background: var(--brand-teacher, #1E3A5F);
+  border-color: var(--brand-teacher, #1E3A5F);
+  color: #ffffff;
+}
+.loo-actions button.primary:hover { filter: brightness(1.08); }
+
+/* ----- Review phase: problem cards ----- */
+.loo-problems {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 18px 0 24px;
+}
+.loo-problem-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.loo-problem-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: start;
+}
+.loo-problem-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--brand-teacher, #1E3A5F);
+  background: rgba(30, 58, 95, 0.08);
+  padding: 6px 12px;
+  border-radius: 8px;
+  letter-spacing: 0.06em;
+}
+.loo-problem-text {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+  background: #fff;
+}
+.loo-problem-remove {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.loo-problem-remove:hover { color: #EF4444; border-color: #EF4444; }
+.loo-steps {
+  border-top: 1px dashed var(--line);
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.loo-step-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  counter-reset: step;
+}
+.loo-step-row {
+  display: grid;
+  grid-template-columns: 28px 1fr auto auto auto;
+  gap: 8px;
+  align-items: center;
+}
+.loo-step-up,
+.loo-step-down {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  font-size: 14px;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+  line-height: 1;
+}
+.loo-step-up:hover:not(:disabled),
+.loo-step-down:hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--text);
+}
+.loo-step-up:disabled,
+.loo-step-down:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.loo-step-row::before {
+  counter-increment: step;
+  content: counter(step) ".";
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  color: var(--accent, #0369A1);
+  text-align: right;
+  font-size: 14px;
+}
+.loo-step-row input[type="text"] {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font: inherit;
+  font-size: 14px;
+  background: #fff;
+}
+.loo-step-row input:focus { outline: 2px solid var(--accent, #0369A1); outline-offset: 1px; }
+.loo-step-remove {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  font-size: 14px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.loo-step-remove:hover { color: #EF4444; border-color: #EF4444; }
+.loo-step-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.loo-step-add,
+.loo-step-regen {
+  background: transparent;
+  border: 1px dashed var(--line-strong);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+}
+.loo-step-add:hover,
+.loo-step-regen:hover { color: var(--text); border-color: var(--text); }
+
+/* ----- Done phase: QR grid ----- */
+.loo-qr-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  margin: 24px 0;
+}
+.loo-qr-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  text-align: center;
+}
+.loo-qr-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 26px;
+  color: var(--brand-teacher, #1E3A5F);
+  letter-spacing: 0.08em;
+}
+.loo-qr-text {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 38px;
+}
+.loo-qr-canvas {
+  background: #fff;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  display: inline-flex;
+}
+.loo-qr-canvas img,
+.loo-qr-canvas canvas { display: block; }
+.loo-qr-link {
+  font-size: 11px;
+  color: var(--muted);
+  word-break: break-all;
+}
+.loo-qr-steps {
+  width: 100%;
+  border-top: 1px dashed var(--line);
+  padding-top: 10px;
+  text-align: left;
+}
+.loo-qr-steps ol {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* Error toast */
+.loo-error {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #B91C1C;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-top: 16px;
+  font-size: 13px;
+}
+
+/* Mobile compaction */
+@media (max-width: 600px) {
+  .loo-body .class-header { flex-wrap: wrap; gap: 8px; padding: 12px 16px; }
+  .loo-body .class-main { padding: 20px 14px 60px; }
+  .loo-problem-head { grid-template-columns: auto 1fr; }
+  .loo-problem-remove { grid-column: 1 / -1; justify-self: end; }
+}
+
+/* ===========================
+   /lesson — koondvaade (MVP per Arendusnõuete koond)
+   =========================== */
+
+/* Response rate */
+.response-rate-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px 22px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+.response-rate-line {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  margin-top: 4px;
+}
+.response-rate-bar {
+  height: 8px;
+  background: rgba(15, 23, 42, 0.06);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.response-rate-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #1E3A5F 0%, #0369A1 100%);
+  transition: width 600ms cubic-bezier(.2,.8,.2,1);
+}
+
+/* Per-problem cards */
+.lesson-problems-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.lesson-problem-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.lesson-problem-head {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: start;
+}
+.lesson-problem-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--brand-teacher, #1E3A5F);
+  background: rgba(30, 58, 95, 0.08);
+  padding: 6px 12px;
+  border-radius: 8px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.lesson-problem-text {
+  margin: 0;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 1.45;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text);
+}
+
+/* Step list with traffic light */
+.lesson-step-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px dashed var(--line);
+  padding-top: 14px;
+}
+.lesson-step {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.025);
+}
+.step-row-head {
+  display: grid;
+  grid-template-columns: 16px 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+.step-class-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-left: 28px;
+}
+.class-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--line);
+  font-size: 11px;
+}
+.class-pill .class-pill-light {
+  width: 8px; height: 8px; border-radius: 999px;
+  background: #94A3B8;
+}
+.class-pill.bucket-ok    .class-pill-light { background: #22C55E; }
+.class-pill.bucket-warn  .class-pill-light { background: #FACC15; }
+.class-pill.bucket-alert .class-pill-light { background: #EF4444; }
+.class-pill .class-pill-name { font-weight: 600; color: var(--text); }
+.class-pill .class-pill-pct  { color: var(--muted); }
+.class-pill.bucket-alert { background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.3); }
+.class-pill.bucket-warn  { background: rgba(250, 204, 21, 0.10); border-color: rgba(250, 204, 21, 0.35); }
+.class-pill.bucket-ok    { background: rgba(34, 197, 94, 0.08); border-color: rgba(34, 197, 94, 0.28); }
+.lesson-step .step-light {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #94A3B8;
+  box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.18);
+}
+.lesson-step.bucket-ok .step-light {
+  background: #22C55E;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+}
+.lesson-step.bucket-warn .step-light {
+  background: #FACC15;
+  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.22);
+}
+.lesson-step.bucket-alert .step-light {
+  background: #EF4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.22);
+}
+.lesson-step.bucket-alert {
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.18);
+}
+.lesson-step.bucket-warn {
+  background: rgba(250, 204, 21, 0.08);
+  border: 1px solid rgba(250, 204, 21, 0.24);
+}
+.lesson-step.bucket-ok {
+  background: rgba(34, 197, 94, 0.06);
+  border: 1px solid rgba(34, 197, 94, 0.18);
+}
+.lesson-step .step-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+}
+.lesson-step .step-meta {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.lesson-step-empty,
+.lesson-empty-state {
+  color: var(--muted);
+  font-size: 13px;
+  font-style: italic;
+  padding: 8px 0;
+}
+
+/* Legend */
+.grid-section-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+.grid-legend { display: inline-flex; gap: 12px; font-size: 11px; color: var(--muted); }
+.grid-legend .leg { display: inline-flex; align-items: center; gap: 6px; }
+.grid-legend .leg::before {
+  content: "";
+  width: 10px; height: 10px; border-radius: 999px; display: inline-block;
+}
+.grid-legend .leg-correct::before { background: #22C55E; }
+.grid-legend .leg-partial::before { background: #FACC15; }
+.grid-legend .leg-wrong::before   { background: #EF4444; }
+
+/* Demo seed card */
+.lesson-seed-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background: rgba(3, 105, 161, 0.04);
+  border: 1px dashed rgba(3, 105, 161, 0.3);
+  border-radius: 14px;
+  padding: 16px 22px;
+  flex-wrap: wrap;
+}
+.lesson-seed-card button.primary {
+  background: var(--accent, #0369A1);
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.lesson-seed-card button.primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .step-row-head { grid-template-columns: 12px 1fr; }
+  .step-row-head .step-meta { grid-column: 1 / -1; padding-left: 24px; }
+  .step-class-row { padding-left: 24px; }
+  .lesson-seed-card { flex-direction: column; align-items: stretch; }
+}
+
+/* ===========================
+   /loo — Õpilasevaate eelvaade (FR-15)
+   =========================== */
+.loo-problem-head { grid-template-columns: auto 1fr auto auto; }
+.loo-problem-preview {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.loo-problem-preview:hover {
+  color: var(--brand-teacher, #1E3A5F);
+  border-color: var(--brand-teacher, #1E3A5F);
+}
+.preview-modal-content {
+  max-width: 480px;
+  width: 92vw;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.preview-problem {
+  background: rgba(91, 33, 182, 0.05);
+  border: 1px solid rgba(91, 33, 182, 0.2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.preview-problem-text {
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 6px 0 0;
+  color: var(--text);
+}
+.preview-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.preview-step {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+.preview-step-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  color: var(--accent, #0369A1);
+  font-size: 16px;
+}
+.preview-step-text {
+  font-size: 14px;
+  line-height: 1.4;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+.preview-step-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.preview-step-buttons button {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 11px;
+  color: var(--muted);
+  cursor: not-allowed;
+  flex: 1;
+  min-width: 130px;
+}
+
+/* ===========================
+   /lesson — kommentaarid (FR-22/FR-27)
+   =========================== */
+.lesson-comments {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+.lesson-comments-empty {
+  color: var(--muted);
+  font-style: italic;
+  font-size: 13px;
+  padding: 12px 0;
+}
+.lesson-comment {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.lesson-comment-meta {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.lesson-comment-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+/* ===========================
+   /loo — kuvamisrežiimi dropdown (FR-13/14)
+   =========================== */
+.loo-mode-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(91, 33, 182, 0.04);
+  border: 1px solid rgba(91, 33, 182, 0.16);
+  border-radius: 10px;
+}
+.loo-mode-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.loo-mode-select {
+  flex: 1;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+}
+.loo-mode-select:focus { outline: 2px solid var(--accent, #0369A1); outline-offset: 1px; }
+
+/* ===========================
+   Õpilane — Teema-režiim (FR-13)
+   =========================== */
+.student-theme-row {
+  padding: 0;
+  background: transparent;
+}
+.theme-pick-btn {
+  width: 100%;
+  text-align: left;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 150ms;
+}
+.theme-pick-btn:hover {
+  border-color: #EF4444;
+  background: rgba(239, 68, 68, 0.04);
+  color: #B91C1C;
+}
+.theme-pick-btn:active { transform: scale(0.98); }
+.theme-ok-btn {
+  width: 100%;
+  background: #22C55E;
+  color: #fff;
+  border: 0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  font: inherit;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+.theme-ok-btn:hover { filter: brightness(1.05); }
+.theme-ok-btn:disabled { opacity: 0.5; cursor: not-allowed; }

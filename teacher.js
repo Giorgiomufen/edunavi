@@ -1029,7 +1029,11 @@
 
   document.addEventListener("DOMContentLoaded", async () => {
     if (!EduNavi.isConfigured) EduNavi.showConfigBanner();
-    $("start-btn").addEventListener("click", () => startLesson());
+    // start-btn is now an <a href="/loo"> — navigation handled by the browser.
+    const startEl = $("start-btn");
+    if (startEl && startEl.tagName === "BUTTON") {
+      startEl.addEventListener("click", () => startLesson());
+    }
 
     // Resume an unfinished lesson if there is one
     const active = getActiveLesson();
