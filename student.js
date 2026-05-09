@@ -114,6 +114,11 @@
     const ex = (u.searchParams.get("ex") || "").trim();
     return /^[0-9a-f-]{8,}$/i.test(ex) ? ex : null;
   }
+  function getLessonFromUrl() {
+    const u = new URL(window.location.href);
+    const lid = (u.searchParams.get("lesson") || "").trim();
+    return /^[0-9a-f-]{8,}$/i.test(lid) ? lid : null;
+  }
 
   function setConnection(status) {
     const pill = $("conn-pill");
@@ -390,6 +395,84 @@
     });
   }
 
+  // Per-lesson QR mode: /student?lesson=<lessonId>
+  // Loads lesson + flat teemad list. Renders per teacher's display_mode.
+  async function joinByLesson(lessonId) {
+    state.sessionId = EduNaviDB && EduNaviDB.getOrCreateSessionId
+      ? EduNaviDB.getOrCreateSessionId()
+      : null;
+    $("join-screen").style.display = "none";
+    $("lesson-view").style.display = "block";
+
+    if (!EduNavi.isConfigured) {
+      EduNavi.showConfigBanner();
+      setConnection("DEMO_MODE");
+      setExercise("Demo režiim — Supabase pole seadistatud.");
+      return;
+    }
+
+    const bundle = await EduNaviDB.findLessonTeemad(lessonId);
+    if (!bundle || !bundle.lesson) {
+      setExercise("Tundi ei leitud. Palu õpetajalt uut linki.");
+      setConnection("CHANNEL_ERROR");
+      return;
+    }
+    if (!bundle.teemad || bundle.teemad.length === 0) {
+      setExercise("Tunnis pole veel teemasid.");
+      setConnection("CHANNEL_ERROR");
+      return;
+    }
+
+    state.lessonId = bundle.lesson.id;
+    state.roomCode = bundle.lesson.room_code || null;
+
+    const roomLabel = $("room-label");
+    if (roomLabel) {
+      const topic = bundle.lesson.topic;
+      roomLabel.textContent = topic ? topic : (bundle.lesson.school || "Tagasiside");
+    }
+
+    if (state.lessonId && state.sessionId) {
+      EduNaviDB.logPresence({
+        lessonId: state.lessonId,
+        sessionId: state.sessionId,
+        action: "join",
+      });
+    }
+
+    // display_mode is stored on every teema row — read from first.
+    const mode = bundle.teemad[0].display_mode || "full";
+
+    // Hide the "Ülesanne" header text since we don't have a single problem in
+    // consolidated mode — the lesson IS the consolidated set.
+    setExercise("");
+
+    if (mode === "blind") {
+      // Pime tagasiside: one global vote on the lesson as a whole. Use the
+      // FIRST teema as the target exercise — pragmatic compromise.
+      state.currentExerciseId = bundle.teemad[0].id;
+      showSingleMode();
+      const lbl = $("single-answer-label");
+      if (lbl) lbl.textContent = "Kuidas tunniga läks?";
+      enableButtons(true);
+    } else if (mode === "theme") {
+      renderThemeMode(bundle.lesson.id, bundle.teemad);
+    } else {
+      // Täisrežiim — render every teema with 2 buttons each
+      applyStepSet({
+        id: bundle.lesson.id,
+        steps: bundle.teemad.map((t) => ({ id: t.id, text: t.text })),
+      });
+    }
+
+    // Class picker if lesson has target_classes
+    if (bundle.lesson && Array.isArray(bundle.lesson.target_classes) && bundle.lesson.target_classes.length > 0) {
+      renderClassPicker(bundle.lesson.target_classes);
+    }
+
+    setConnection("SUBSCRIBED");
+  }
+
   // Per-exercise QR mode: /student?ex=<exerciseId>
   // No realtime channel — load problem + steps from DB, render as a step set,
   // log responses directly to Supabase. Teacher reviews async at /lesson?id=...
@@ -525,9 +608,12 @@
       setStatus("Kommentaar saadetud", true);
     });
 
+    const lessonId = getLessonFromUrl();
     const exerciseId = getExerciseFromUrl();
     const room = getRoomFromUrl();
-    if (exerciseId) {
+    if (lessonId) {
+      joinByLesson(lessonId);
+    } else if (exerciseId) {
       joinByExercise(exerciseId);
     } else if (room) {
       joinRoom(room);

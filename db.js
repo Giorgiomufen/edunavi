@@ -72,8 +72,31 @@
     return logExercise(args);
   }
 
-  // For the per-exercise student QR: load one parent exercise, its child steps,
-  // and the lesson it belongs to (so we can log responses + join the channel).
+  // For the lesson-level student QR (new flow): load lesson + its teemad
+  // (all exercises in this lesson, treated as a flat list).
+  async function findLessonTeemad(lessonId) {
+    const c = client();
+    if (!c || !lessonId) return null;
+    const { data: lesson, error: lErr } = await c
+      .from("lessons")
+      .select("id, room_code, topic, school, target_classes")
+      .eq("id", lessonId)
+      .maybeSingle();
+    if (lErr || !lesson) {
+      if (lErr) console.warn("[db] findLessonTeemad lesson failed", lErr);
+      return null;
+    }
+    const { data: teemad, error: tErr } = await c
+      .from("exercises")
+      .select("id, text, posted_at, display_mode")
+      .eq("lesson_id", lessonId)
+      .order("posted_at", { ascending: true });
+    if (tErr) console.warn("[db] findLessonTeemad teemad failed", tErr);
+    return { lesson, teemad: teemad || [] };
+  }
+
+  // Legacy per-exercise QR (old flow): load one parent exercise + its child
+  // steps. Kept for backwards compat with any old links still in the wild.
   async function findExerciseWithSteps(exerciseId) {
     const c = client();
     if (!c || !exerciseId) return null;
@@ -176,6 +199,7 @@
     logExercise,
     createExercise,
     findExerciseWithSteps,
+    findLessonTeemad,
     logResponse,
     logComment,
     logPresence,

@@ -90,10 +90,9 @@
     $("lesson-empty").style.display = "block";
   }
 
-  // ---- AGGREGATE ----
-  // Returns per-step counts globally + per-class (FR-32).
+  // ---- AGGREGATE (flat teemad — new consolidated flow) ----
+  // Treats every exercise row as a teema. Ignores parent_exercise_id.
   function aggregate(exercises, responses) {
-    // Dedupe: last answer per (exercise, session) wins
     const dedup = new Map();
     responses.forEach((r) => {
       const sid = r.session_id || `anon-${Math.random()}`;
@@ -101,8 +100,8 @@
       dedup.set(key, { exId: r.exercise_id, ans: r.answer, sid, klass: r.class_name || null });
     });
 
-    const counts = {};                  // global per-exercise
-    const countsByClass = {};           // counts[exId][className] = {yes,unsure,no}
+    const counts = {};
+    const countsByClass = {};
     const respondingSessions = new Set();
     const classes = new Set();
 
@@ -118,52 +117,34 @@
       if (sid && !sid.startsWith("anon-")) respondingSessions.add(sid);
     });
 
-    // Split parent / step
-    const problems = exercises.filter((e) => !e.parent_exercise_id);
-    const stepsByParent = new Map();
-    exercises.forEach((e) => {
-      if (e.parent_exercise_id) {
-        if (!stepsByParent.has(e.parent_exercise_id)) stepsByParent.set(e.parent_exercise_id, []);
-        stepsByParent.get(e.parent_exercise_id).push(e);
-      }
-    });
-
     const classList = [...classes].sort();
 
-    const problemViews = problems.map((p) => {
-      const steps = (stepsByParent.get(p.id) || []).map((s) => {
-        const c = counts[s.id] || { yes: 0, unsure: 0, no: 0 };
-        const total = c.yes + c.unsure + c.no;
-        const stuck = c.unsure + c.no;
-        const stuckPct = total === 0 ? 0 : Math.round((stuck / total) * 100);
-        // Per-class view for this step
-        const perClass = classList.map((klass) => {
-          const cc = (countsByClass[s.id] && countsByClass[s.id][klass]) || { yes: 0, unsure: 0, no: 0 };
-          const ct = cc.yes + cc.unsure + cc.no;
-          const cs = cc.unsure + cc.no;
-          const csPct = ct === 0 ? 0 : Math.round((cs / ct) * 100);
-          return {
-            klass, total: ct, ...cc,
-            stuckPct: csPct,
-            bucket: ct === 0 ? "none" : trafficBucket(csPct),
-          };
-        });
+    // Every exercise row → one teema view
+    const teemaViews = exercises.map((ex) => {
+      const c = counts[ex.id] || { yes: 0, unsure: 0, no: 0 };
+      const total = c.yes + c.unsure + c.no;
+      const stuck = c.unsure + c.no;
+      const stuckPct = total === 0 ? 0 : Math.round((stuck / total) * 100);
+      const perClass = classList.map((klass) => {
+        const cc = (countsByClass[ex.id] && countsByClass[ex.id][klass]) || { yes: 0, unsure: 0, no: 0 };
+        const ct = cc.yes + cc.unsure + cc.no;
+        const cs = cc.unsure + cc.no;
+        const csPct = ct === 0 ? 0 : Math.round((cs / ct) * 100);
         return {
-          id: s.id, text: s.text, total, ...c,
-          stuckPct, bucket: trafficBucket(stuckPct),
-          perClass,
+          klass, total: ct, ...cc,
+          stuckPct: csPct,
+          bucket: ct === 0 ? "none" : trafficBucket(csPct),
         };
       });
-      return { id: p.id, text: p.text, steps };
+      return {
+        id: ex.id, text: ex.text, total, ...c,
+        stuckPct, bucket: trafficBucket(stuckPct),
+        perClass,
+      };
     });
 
-    const allSteps = problemViews.flatMap((p) =>
-      p.steps.map((s) => ({ ...s, problemText: p.text }))
-    );
-
     return {
-      problemViews,
-      allSteps,
+      teemaViews,
       respondingCount: respondingSessions.size,
       classList,
     };
@@ -183,13 +164,13 @@
     $("lesson-topic").textContent = lesson.topic ? `Teema: ${lesson.topic}` : "";
 
     // Soovitus (FR-37)
-    renderRecommendation(agg.allSteps);
+    renderRecommendation(agg.teemaViews);
 
     // Vastamismäär (FR-31)
     renderResponseRate(respondingCount, targetCount);
 
-    // Per-problem cards (FR-30 + FR-34)
-    renderProblems(agg.problemViews, respondingCount);
+    // Flat teema list (FR-30 + FR-34)
+    renderTeemad(agg.teemaViews, respondingCount);
 
     // Comments (FR-22) — anonymous student comments grouped by exercise
     renderComments(comments || []);
@@ -205,13 +186,13 @@
   // Doc loetleb 5 sekkumist: edasi / uuesti selgita / lisaülesanne /
   // kohapealne tugiõpetaja / planeeri tund ümber. Vali stuck % ja
   // raskuste hulga põhjal.
-  function renderRecommendation(allSteps) {
-    if (allSteps.length === 0) {
+  function renderRecommendation(teemaViews) {
+    if (teemaViews.length === 0) {
       $("lesson-headline").textContent = "Tunnis pole teemasid.";
       $("lesson-detail").textContent = "Lisa /loo lehel ülesandeid ja teemasid.";
       return;
     }
-    const withResponses = allSteps.filter((s) => s.total > 0);
+    const withResponses = teemaViews.filter((s) => s.total > 0);
     if (withResponses.length === 0) {
       $("lesson-headline").textContent = "Õpilased pole veel vastanud.";
       $("lesson-detail").textContent = "Jaga ülesannete QR-koode õpilastega või kasuta all olevat \"Lisa demo-vastused\" nuppu, et dashboard'i näha.";
@@ -241,7 +222,7 @@
       $("lesson-headline").textContent =
         `Kõige raskem teema: "${worst.text}" — ${worst.stuckPct}% jäi kinni (${stuckCount}/${totalCount}).`;
       $("lesson-detail").textContent =
-        `Soovitus: võta see teema järgmise tunni alguses uuesti läbi, enne kui edasi liigud. Ülesandes: "${worst.problemText}". Anna seejärel sarnane lisaülesanne, et kontrollida, kas mõistmine paranes.`;
+        `Soovitus: võta see teema järgmise tunni alguses uuesti läbi, enne kui edasi liigud. Anna seejärel sarnane lisaülesanne, et kontrollida, kas mõistmine paranes.`;
       return;
     }
 
@@ -283,29 +264,21 @@
     $("response-rate-fill").style.width = `${Math.min(pct, 100)}%`;
   }
 
-  function renderProblems(problemViews, totalSessions) {
+  function renderTeemad(teemaViews, totalSessions) {
     const wrap = $("lesson-problems-list");
     wrap.innerHTML = "";
-    if (problemViews.length === 0) {
-      wrap.innerHTML = `<div class="lesson-empty-state">Ülesanded puuduvad.</div>`;
+    if (teemaViews.length === 0) {
+      wrap.innerHTML = `<div class="lesson-empty-state">Teemasid pole.</div>`;
       return;
     }
-    problemViews.forEach((p, pi) => {
-      const card = document.createElement("article");
-      card.className = "lesson-problem-card";
-      card.innerHTML = `
-        <header class="lesson-problem-head">
-          <span class="lesson-problem-num">${String(pi + 1).padStart(2, "0")}</span>
-          <h2 class="lesson-problem-text">${escapeHtml(p.text)}</h2>
-        </header>
-        <ol class="lesson-step-list">
-          ${p.steps.length === 0
-            ? `<li class="lesson-step-empty">Selle ülesande all pole teemasid.</li>`
-            : p.steps.map((s) => stepRowHtml(s, totalSessions)).join("")}
-        </ol>
-      `;
-      wrap.appendChild(card);
-    });
+    const card = document.createElement("article");
+    card.className = "lesson-problem-card";
+    card.innerHTML = `
+      <ol class="lesson-step-list" style="border-top:0; padding-top:0;">
+        ${teemaViews.map((t) => stepRowHtml(t, totalSessions)).join("")}
+      </ol>
+    `;
+    wrap.appendChild(card);
   }
 
   function stepRowHtml(s, totalSessions) {
@@ -370,7 +343,9 @@
     btn.disabled = true;
     btn.textContent = "Lisan...";
 
-    const stepIds = exercises.filter((e) => e.parent_exercise_id).map((e) => e.id);
+    // Treat every exercise row as a teema (new flow). Old parent/step
+    // lessons end up seeding both — harmless.
+    const stepIds = exercises.map((e) => e.id);
     if (stepIds.length === 0) {
       alert("Selle tunni all pole teemasid (loo /loo lehel ülesandeid + teemasid).");
       btn.disabled = false; btn.textContent = "Lisa demo-vastused";

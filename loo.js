@@ -1,10 +1,12 @@
 /* loo.js — Teacher prep flow.
  *   1. Pick classes + paste exercises.
- *   2. AI proposes steps per exercise; teacher reviews + edits.
- *   3. Confirm → persist lesson + problems + steps; render per-problem QR codes.
+ *   2. AI consolidates teemad (math concepts) ACROSS all exercises into ONE
+ *      flat list. Teacher reviews + edits.
+ *   3. Confirm → persist lesson + flat teema list; render ONE QR code that
+ *      students scan to give per-teema feedback.
  *
- * No realtime channel needed — students arrive via per-exercise QR and write
- * directly to Supabase responses. Teacher views stats later at /lesson?id=...
+ * No realtime channel — students arrive via QR and write directly to
+ * Supabase. Teacher views aggregated stats at /lesson?id=...
  */
 (function () {
   const $ = (id) => document.getElementById(id);
@@ -13,7 +15,9 @@
     school: null,
     topic: null,
     targetClasses: [],
-    problems: [],   // [{ id (client uuid), text, steps: ["..."] }]
+    problems: [],     // pasted text only, raw input — kept for context display
+    teemad: [],       // consolidated flat list: [{ id, text }]
+    displayMode: "full",
     lessonId: null,
     roomCode: null,
   };
@@ -195,6 +199,20 @@
     else if (name === "phase-done") ind.textContent = "3 / 3 · valmis";
   }
 
+  // ---------- Consolidate teemad across all problems ----------
+  // Dedupes by case-insensitive match. Preserves first-seen order.
+  function consolidateTeemad(problems) {
+    const seen = new Map();   // norm → original
+    problems.forEach((text) => {
+      const teemad = proposeStepsFor(text);
+      teemad.forEach((t) => {
+        const norm = t.toLowerCase().trim();
+        if (!seen.has(norm)) seen.set(norm, t);
+      });
+    });
+    return [...seen.values()].map((text) => ({ id: uuid(), text }));
+  }
+
   // ---------- Phase 1 → 2: generate ----------
   function onGenerate() {
     state.school = $("school").value || null;
@@ -205,123 +223,90 @@
       showError("Lisa vähemalt üks ülesanne.");
       return;
     }
-    state.problems = problems.map((text) => ({
-      id: uuid(),
-      text,
-      steps: proposeStepsFor(text),
-      displayMode: "full",   // FR-13/14 — Täisrežiim vaikimisi
-    }));
-    renderProblemsList();
+    state.problems = problems;
+    state.teemad = consolidateTeemad(problems);
+    state.displayMode = "full";
+    renderReview();
     showPhase("phase-review");
   }
 
-  function renderProblemsList() {
-    const list = $("problems-list");
-    list.innerHTML = "";
-    state.problems.forEach((problem, pi) => {
-      const card = document.createElement("article");
-      card.className = "loo-problem-card";
-      card.dataset.problemId = problem.id;
-      card.innerHTML = `
-        <div class="loo-problem-head">
-          <span class="loo-problem-num">${String(pi + 1).padStart(2, "0")}</span>
-          <textarea class="loo-problem-text" rows="2">${escapeHtml(problem.text)}</textarea>
-          <button class="loo-problem-preview" type="button" title="Kuva, mida õpilane näeb">👁</button>
-          <button class="loo-problem-remove" type="button" title="Eemalda see ülesanne">×</button>
-        </div>
-        <div class="loo-mode-row">
-          <label class="loo-mode-label">Õpilane näeb:</label>
-          <select class="loo-mode-select">
-            <option value="full"${problem.displayMode === "full" ? " selected" : ""}>Täisrežiim — kõik teemad nähtavad</option>
-            <option value="theme"${problem.displayMode === "theme" ? " selected" : ""}>Teema-režiim — ainult teemade nimed</option>
-            <option value="blind"${problem.displayMode === "blind" ? " selected" : ""}>Pime tagasiside — ei näe teemasid ette</option>
-          </select>
-        </div>
-        <div class="loo-steps">
-          <span class="eyebrow" style="margin-bottom:8px;">Teemad</span>
-          <ol class="loo-step-list"></ol>
-          <div class="loo-step-actions">
-            <button class="loo-step-add" type="button">+ Lisa teema</button>
-            <button class="loo-step-regen" type="button">↻ Genereeri uuesti</button>
-          </div>
-        </div>
+  function renderReview() {
+    // Show pasted problems read-only (context) + flat teema list (editable).
+    const ctx = $("review-context");
+    if (ctx) {
+      ctx.innerHTML = `
+        <span class="eyebrow">Ülesanded (${state.problems.length})</span>
+        <ul class="review-problems">
+          ${state.problems.map((p) => `<li>${escapeHtml(p)}</li>`).join("")}
+        </ul>
       `;
-      const stepList = card.querySelector(".loo-step-list");
-      problem.steps.forEach((s, si) => stepList.appendChild(stepRow(problem, si, s)));
-      // Wire problem-level controls
-      card.querySelector(".loo-problem-text").addEventListener("input", (e) => {
-        problem.text = e.target.value;
+    }
+    const modeSel = $("review-mode");
+    if (modeSel) modeSel.value = state.displayMode;
+    renderTeemaList();
+  }
+
+  function renderTeemaList() {
+    const list = $("teemad-list");
+    if (!list) return;
+    list.innerHTML = "";
+    state.teemad.forEach((teema, ti) => {
+      const li = document.createElement("li");
+      li.className = "loo-teema-row";
+      const isFirst = ti === 0;
+      const isLast = ti === state.teemad.length - 1;
+      li.innerHTML = `
+        <span class="loo-teema-num mono">${String(ti + 1).padStart(2, "0")}</span>
+        <input type="text" class="loo-teema-input" value="${escapeHtml(teema.text)}" />
+        <button type="button" class="loo-step-up" title="Üles" ${isFirst ? "disabled" : ""}>↑</button>
+        <button type="button" class="loo-step-down" title="Alla" ${isLast ? "disabled" : ""}>↓</button>
+        <button type="button" class="loo-step-remove" title="Eemalda">×</button>
+      `;
+      li.querySelector(".loo-teema-input").addEventListener("input", (e) => {
+        teema.text = e.target.value;
       });
-      card.querySelector(".loo-problem-remove").addEventListener("click", () => {
-        state.problems = state.problems.filter((p) => p.id !== problem.id);
-        renderProblemsList();
+      li.querySelector(".loo-step-up").addEventListener("click", () => {
+        if (ti === 0) return;
+        const arr = state.teemad;
+        [arr[ti - 1], arr[ti]] = [arr[ti], arr[ti - 1]];
+        renderTeemaList();
       });
-      card.querySelector(".loo-problem-preview").addEventListener("click", () => {
-        showPreview(problem);
+      li.querySelector(".loo-step-down").addEventListener("click", () => {
+        const arr = state.teemad;
+        if (ti >= arr.length - 1) return;
+        [arr[ti + 1], arr[ti]] = [arr[ti], arr[ti + 1]];
+        renderTeemaList();
       });
-      card.querySelector(".loo-mode-select").addEventListener("change", (e) => {
-        problem.displayMode = e.target.value;
+      li.querySelector(".loo-step-remove").addEventListener("click", () => {
+        state.teemad.splice(ti, 1);
+        renderTeemaList();
       });
-      card.querySelector(".loo-step-add").addEventListener("click", () => {
-        problem.steps.push("");
-        renderProblemsList();
-      });
-      card.querySelector(".loo-step-regen").addEventListener("click", () => {
-        problem.steps = proposeStepsFor(problem.text);
-        renderProblemsList();
-      });
-      list.appendChild(card);
+      list.appendChild(li);
     });
   }
-  function stepRow(problem, idx, value) {
-    const li = document.createElement("li");
-    li.className = "loo-step-row";
-    const isFirst = idx === 0;
-    const isLast = idx === problem.steps.length - 1;
-    li.innerHTML = `
-      <input type="text" value="${escapeHtml(value)}" />
-      <button class="loo-step-up" type="button" title="Liiguta ülespoole" ${isFirst ? "disabled" : ""}>↑</button>
-      <button class="loo-step-down" type="button" title="Liiguta allapoole" ${isLast ? "disabled" : ""}>↓</button>
-      <button class="loo-step-remove" type="button" title="Eemalda teema">×</button>
-    `;
-    const input = li.querySelector("input");
-    input.addEventListener("input", (e) => {
-      problem.steps[idx] = e.target.value;
-    });
-    li.querySelector(".loo-step-up").addEventListener("click", () => {
-      if (idx === 0) return;
-      const arr = problem.steps;
-      [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
-      renderProblemsList();
-    });
-    li.querySelector(".loo-step-down").addEventListener("click", () => {
-      const arr = problem.steps;
-      if (idx >= arr.length - 1) return;
-      [arr[idx + 1], arr[idx]] = [arr[idx], arr[idx + 1]];
-      renderProblemsList();
-    });
-    li.querySelector(".loo-step-remove").addEventListener("click", () => {
-      problem.steps.splice(idx, 1);
-      renderProblemsList();
-    });
-    return li;
+
+  function addTeema() {
+    state.teemad.push({ id: uuid(), text: "" });
+    renderTeemaList();
+  }
+
+  function regenerateTeemad() {
+    state.teemad = consolidateTeemad(state.problems);
+    renderTeemaList();
   }
 
   // ---------- Phase 2 → 3: confirm + persist ----------
   async function onConfirm() {
-    // Strip empty steps + drop empty problems
-    state.problems.forEach((p) => {
-      p.steps = p.steps.map((s) => s.trim()).filter(Boolean);
-    });
-    state.problems = state.problems.filter((p) => p.text.trim().length > 0);
-    if (state.problems.length === 0) {
-      showError("Pole ühtegi sisukat ülesannet.");
+    state.teemad = state.teemad
+      .map((t) => ({ ...t, text: t.text.trim() }))
+      .filter((t) => t.text.length > 0);
+    if (state.teemad.length === 0) {
+      showError("Pole ühtegi teemat. Lisa vähemalt üks.");
       return;
     }
 
     state.roomCode = generateRoomCode();
 
-    // Persist lesson row
     const user = await EduNaviAuth.getUser();
     const lessonId = await EduNaviDB.createLesson({
       roomCode: state.roomCode,
@@ -337,92 +322,99 @@
     }
     state.lessonId = lessonId;
 
-    // Persist each problem (top-level exercise) + its steps (child exercises)
-    for (const problem of state.problems) {
-      const problemRowId = await EduNaviDB.createExercise({
+    // Persist teemad as flat top-level exercises (no parent_exercise_id).
+    // display_mode goes on every row so /student can read any of them.
+    for (const teema of state.teemad) {
+      const id = await EduNaviDB.createExercise({
         lessonId,
-        text: problem.text,
+        text: teema.text,
         parentExerciseId: null,
-        displayMode: problem.displayMode || "full",
+        displayMode: state.displayMode || "full",
       });
-      problem.dbId = problemRowId || problem.id;
-      for (let i = 0; i < problem.steps.length; i++) {
-        await EduNaviDB.createExercise({
-          lessonId,
-          text: `${i + 1}. ${problem.steps[i]}`,
-          parentExerciseId: problem.dbId,
-        });
-      }
+      teema.dbId = id || teema.id;
     }
 
-    renderQrGrid();
+    renderQr(lessonId);
     const link = $("open-dashboard-link");
     if (link) link.setAttribute("href", `/lesson?id=${encodeURIComponent(lessonId)}`);
     showPhase("phase-done");
   }
 
-  function renderQrGrid() {
+  function renderQr(lessonId) {
     const grid = $("qr-grid");
     grid.innerHTML = "";
     const baseUrl = window.location.origin;
-    state.problems.forEach((problem, pi) => {
-      const url = `${baseUrl}/student?ex=${encodeURIComponent(problem.dbId)}`;
-      const card = document.createElement("article");
-      card.className = "loo-qr-card";
-      card.innerHTML = `
-        <div class="loo-qr-num">${String(pi + 1).padStart(2, "0")}</div>
-        <div class="loo-qr-text">${escapeHtml(problem.text)}</div>
-        <div class="loo-qr-canvas"></div>
-        <div class="loo-qr-link mono">${url.replace(window.location.origin, "")}</div>
-        <div class="loo-qr-steps">
-          <span class="eyebrow" style="font-size:10px;">${problem.steps.length} teemat</span>
-          <ol>${problem.steps.map((s) => `<li>${escapeHtml(s)}</li>`).join("")}</ol>
-        </div>
-      `;
-      grid.appendChild(card);
-      // Render the QR into its slot
-      const canvasHost = card.querySelector(".loo-qr-canvas");
-      try {
-        new QRCode(canvasHost, {
-          text: url,
-          width: 180,
-          height: 180,
-          colorDark: "#0F172A",
-          colorLight: "#FFFFFF",
-          correctLevel: QRCode.CorrectLevel.M,
-        });
-      } catch (e) {
-        canvasHost.textContent = "QR error";
-      }
-    });
+    const url = `${baseUrl}/student?lesson=${encodeURIComponent(lessonId)}`;
+    const card = document.createElement("article");
+    card.className = "loo-qr-card loo-qr-card-single";
+    card.innerHTML = `
+      <div class="loo-qr-text">Skanni QR-kood, et anda tagasisidet teemade kohta.</div>
+      <div class="loo-qr-canvas"></div>
+      <div class="loo-qr-link mono">${url.replace(window.location.origin, "")}</div>
+      <div class="loo-qr-steps">
+        <span class="eyebrow" style="font-size:10px;">${state.teemad.length} teemat</span>
+        <ol>${state.teemad.map((t) => `<li>${escapeHtml(t.text)}</li>`).join("")}</ol>
+      </div>
+    `;
+    grid.appendChild(card);
+    const canvasHost = card.querySelector(".loo-qr-canvas");
+    try {
+      new QRCode(canvasHost, {
+        text: url,
+        width: 240,
+        height: 240,
+        colorDark: "#0F172A",
+        colorLight: "#FFFFFF",
+        correctLevel: QRCode.CorrectLevel.M,
+      });
+    } catch (e) {
+      canvasHost.textContent = "QR error";
+    }
   }
 
-  // ---- FR-15: õpilasevaate eelvaade ----
-  function showPreview(problem) {
+  // ---- FR-15: õpilasevaate eelvaade — kogu konsolideeritud nimekiri ----
+  function showPreview() {
     const body = $("preview-body");
-    const cleanSteps = problem.steps.map((s) => s.trim()).filter(Boolean);
-    body.innerHTML = `
-      <div class="preview-problem">
-        <span class="eyebrow">Ülesanne</span>
-        <p class="preview-problem-text">${escapeHtml(problem.text)}</p>
-      </div>
-      ${cleanSteps.length > 0 ? `
+    const teemad = state.teemad.map((t) => t.text.trim()).filter(Boolean);
+    const mode = state.displayMode;
+    let inner;
+    if (mode === "blind") {
+      inner = `
+        <p style="color:var(--muted); font-size:13px; margin-bottom:14px;">
+          Pime tagasiside — õpilane ei näe teemasid ette. Üks valik kogu tunni kohta.
+        </p>
+        <div class="preview-step-buttons">
+          <button type="button" disabled>Ei saanud aru üldse</button>
+          <button type="button" disabled>Sain aru, aga TI aitas</button>
+        </div>`;
+    } else if (mode === "theme") {
+      inner = `
+        <p style="color:var(--muted); font-size:13px; margin-bottom:14px;">
+          Teema-režiim — õpilane vajutab teemat, kus ta jäi kinni.
+        </p>
         <ol class="preview-steps">
-          ${cleanSteps.map((s, i) => `
+          ${teemad.map((t) => `<li class="preview-step"><div class="preview-step-body"><div class="preview-step-text">${escapeHtml(t)}</div></div></li>`).join("")}
+        </ol>`;
+    } else {
+      inner = `
+        <p style="color:var(--muted); font-size:13px; margin-bottom:14px;">
+          Täisrežiim — õpilane näeb iga teema juures kahte nuppu.
+        </p>
+        <ol class="preview-steps">
+          ${teemad.map((t, i) => `
             <li class="preview-step">
               <span class="preview-step-num">${i + 1}.</span>
               <div class="preview-step-body">
-                <div class="preview-step-text">${escapeHtml(s)}</div>
+                <div class="preview-step-text">${escapeHtml(t)}</div>
                 <div class="preview-step-buttons">
                   <button type="button" disabled>Ei saanud aru üldse</button>
                   <button type="button" disabled>Sain aru, aga TI aitas</button>
                 </div>
               </div>
-            </li>
-          `).join("")}
-        </ol>
-      ` : `<p style="color:var(--muted); font-size:13px;">Sellel ülesandel pole teemasid.</p>`}
-    `;
+            </li>`).join("")}
+        </ol>`;
+    }
+    body.innerHTML = inner;
     $("preview-modal").classList.add("show");
   }
   function hidePreview() {
@@ -448,8 +440,15 @@
     });
     $("back-to-input").addEventListener("click", () => showPhase("phase-input"));
     $("confirm-btn").addEventListener("click", onConfirm);
+    if ($("review-mode")) $("review-mode").addEventListener("change", (e) => {
+      state.displayMode = e.target.value;
+    });
+    if ($("review-add-teema")) $("review-add-teema").addEventListener("click", addTeema);
+    if ($("review-regen")) $("review-regen").addEventListener("click", regenerateTeemad);
+    if ($("review-preview")) $("review-preview").addEventListener("click", showPreview);
     $("new-lesson-btn").addEventListener("click", () => {
       state.problems = [];
+      state.teemad = [];
       state.lessonId = null;
       state.roomCode = null;
       $("document").value = "";

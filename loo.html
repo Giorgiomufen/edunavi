@@ -101,19 +101,38 @@ Liida murrud 2/3 + 1/4
         </div>
       </section>
 
-      <!-- Phase 2: review AI-generated steps -->
+      <!-- Phase 2: review consolidated teemad -->
       <section id="phase-review" class="loo-phase" style="display:none;">
         <div class="recommendation">
           <span class="eyebrow">2. Vaata teemad üle</span>
-          <h1 class="rec-headline">AI pakkus teemad · sina kinnitad</h1>
-          <p class="rec-detail">Iga ülesande juures on AI pakutud teemad. Muuda teksti, lisa või eemalda teemasid. Kui valmis, kinnita all.</p>
+          <h1 class="rec-headline">AI järeldas teemad · sina kinnitad</h1>
+          <p class="rec-detail">AI on koondanud sinu ülesannetest matemaatikateemad. Muuda teksti, järjesta, lisa või eemalda. Õpilane annab tagasisidet iga teema kohta eraldi.</p>
         </div>
 
-        <div id="problems-list" class="loo-problems"></div>
+        <div id="review-context" class="review-context"></div>
+
+        <div class="loo-block">
+          <div class="loo-mode-row">
+            <label class="loo-mode-label">Õpilane näeb:</label>
+            <select id="review-mode" class="loo-mode-select">
+              <option value="full">Täisrežiim — kõik teemad nähtavad</option>
+              <option value="theme">Teema-režiim — teemade nimed kuvatud, üks valik</option>
+              <option value="blind">Pime tagasiside — ei näe teemasid ette</option>
+            </select>
+            <button type="button" id="review-preview" class="loo-step-regen" title="Kuva, mida õpilane näeb">👁 Eelvaade</button>
+          </div>
+
+          <span class="eyebrow" style="margin-top:18px; margin-bottom:8px; display:block;">Teemad</span>
+          <ol id="teemad-list" class="loo-teemad-list"></ol>
+          <div class="loo-step-actions">
+            <button type="button" id="review-add-teema">+ Lisa teema</button>
+            <button type="button" id="review-regen">↻ Genereeri uuesti</button>
+          </div>
+        </div>
 
         <div class="loo-actions" style="justify-content:space-between;">
           <button id="back-to-input">← Tagasi muutma</button>
-          <button class="primary" id="confirm-btn">Kinnita ja loo QR-koodid →</button>
+          <button class="primary" id="confirm-btn">Kinnita ja loo QR-kood →</button>
         </div>
       </section>
 
